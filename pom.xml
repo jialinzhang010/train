@@ -23,6 +23,7 @@
     </developers>
     <modules>
         <module>member</module>
+        <module>common</module>
     </modules>
     <scm>
         <connection/>
@@ -56,6 +57,11 @@
                 <version>1.2.70</version>
             </dependency>
 
+            <dependency>
+                <groupId>com.jiawa</groupId>
+                <artifactId>common</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
