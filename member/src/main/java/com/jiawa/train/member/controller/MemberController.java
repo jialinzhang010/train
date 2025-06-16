@@ -29,4 +29,9 @@ public class MemberController {
 //        return commonResp;
         return new CommonResp<>(register);
     }
+    @GetMapping("/test")
+    public CommonResp test() {
+        throw new RuntimeException("手动测试异常");
+    }
 }
+
