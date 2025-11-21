@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+        PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+        "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+
+<generatorConfiguration>
+    <context id="Mysql" targetRuntime="MyBatis3" defaultModelType="flat">
+
+        <!-- automatically check and add backticks (`) to each keyword -->
+        <!-- select * from `from` -->
+        <property name="autoDelimitKeywords" value="true"/>
+        <property name="beginningDelimiter" value="`"/>
+        <property name="endingDelimiter" value="`"/>
+
+        <!--Overwrite and generate an XML file-->
+        <plugin type="org.mybatis.generator.plugins.UnmergeableXmlMappersPlugin" />
+        <!-- Add the toString() method to the generated entity class -->
+        <plugin type="org.mybatis.generator.plugins.ToStringPlugin"/>
+
+        <!-- Do not generate comments -->
+        <commentGenerator>
+            <property name="suppressAllComments" value="true"/>
+        </commentGenerator>
+
+        <!-- Configure the data source, which needs to be modified according to your project -->
+        <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
+                        connectionURL="jdbc:mysql://localhost:3306/train_member"
+                        userId="train_member"
+                        password="train">
+        </jdbcConnection>
+
+        <!-- Location of the domain class. targetProject is a path relative to the pom.xml-->
+        <javaModelGenerator targetProject="../member/src/main/java"
+                            targetPackage="com.jialin.train.member.domain"/>
+
+        <!-- Location of the Mapper XML. targetProject is a path relative to the pom.xml -->
+        <sqlMapGenerator targetProject="../member/src/main/resources"
+                         targetPackage="mapper"/>
+
+        <!-- Location of the Mapper class. targetProject is a path relative to the pom.xml -->
+        <javaClientGenerator targetProject="../member/src/main/java"
+                             targetPackage="com.jialin.train.member.mapper"
+                             type="XMLMAPPER"/>
+
+        <!--<table tableName="member" domainObjectName="Member"/>-->
+        <table tableName="member" domainObjectName="Member"/>
+    </context>
+</generatorConfiguration>
