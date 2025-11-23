@@ -1,5 +1,6 @@
 package com.jialin.train.common.controller;
 
+import com.jialin.train.common.exception.BusinessException;
 import com.jialin.train.common.resp.CommonResp;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,8 +22,24 @@ public class ControllerExceptionHandler {
         CommonResp commonResp = new CommonResp();
         LOG.error("Exception: ", e);
         commonResp.setSuccess(false);
-//        commonResp.setMessage("Exception, please contact admin");
-        commonResp.setMessage(e.getMessage());
+        commonResp.setMessage("Exception, please contact admin");
+//        commonResp.setMessage(e.getMessage());
+        return commonResp;
+
+    }
+
+    /**
+     * Business exception handler
+     * @param e
+     * @return
+     */
+    @ExceptionHandler(value = BusinessException.class)
+    @ResponseBody
+    public CommonResp exceptionHandler(BusinessException e) {
+        CommonResp commonResp = new CommonResp();
+        LOG.error("Business Exception: {}", e.getE().getDesc());
+        commonResp.setSuccess(false);
+        commonResp.setMessage(e.getE().getDesc());
         return commonResp;
 
     }

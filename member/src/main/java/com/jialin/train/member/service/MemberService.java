@@ -1,6 +1,8 @@
 package com.jialin.train.member.service;
 
 import cn.hutool.core.collection.CollUtil;
+import com.jialin.train.common.exception.BusinessException;
+import com.jialin.train.common.exception.BusinessExceptionEnum;
 import com.jialin.train.member.domain.Member;
 import com.jialin.train.member.domain.MemberExample;
 import com.jialin.train.member.mapper.MemberMapper;
@@ -26,7 +28,7 @@ public class MemberService {
         List<Member> list = memberMapper.selectByExample(memberExample);
         if (CollUtil.isNotEmpty(list)) {
 //            return list.get(0).getId();
-            throw new RuntimeException("phone number is exist");
+            throw new BusinessException(BusinessExceptionEnum.MEMBER_MOBILE_EXIST);
         }
 
         Member member = new Member();
