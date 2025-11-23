@@ -1,6 +1,9 @@
 package com.jialin.train.member.req;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class MemberRegisterReq {
+    @NotBlank(message = "phone number must not be blank")
     private String mobile;
 
     public String getMobile() {
