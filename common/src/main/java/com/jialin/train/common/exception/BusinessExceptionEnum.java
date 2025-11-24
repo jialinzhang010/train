@@ -2,7 +2,9 @@ package com.jialin.train.common.exception;
 
 public enum BusinessExceptionEnum {
 
-    MEMBER_MOBILE_EXIST("phone number is exist");
+    MEMBER_MOBILE_EXIST("Phone number is exist"),
+    MEMBER_MOBILE_NOT_EXIST("Please first get the verification code"),
+    MEMBER_MOBILE_CODE_ERROR("Wrong verification code");
 
     private String desc;
 
