@@ -27,7 +27,7 @@
               <a @click="sendCode">Send code</a>
             </template>
           </a-input>
-          <!--<a-input v-model:value="loginForm.code" placeholder="验证码"/>-->
+          <!--<a-input v-model:value="loginForm.code" placeholder="Verification code"/>-->
         </a-form-item>
         <a-form-item>
           <a-button type="primary" block @Click="login">Login</a-button>
@@ -40,6 +40,7 @@
 <script>
 import {defineComponent, reactive} from 'vue';
 import axios from "axios";
+import {notification} from "ant-design-vue";
 
 export default defineComponent({
   name: "login-view",
@@ -49,27 +50,38 @@ export default defineComponent({
       code: '',
     });
 
-    const onFinish = values => {
-      console.log("Success: ", values);
-    };
-
-    const onFinishFailed = errorInfo => {
-      console.log('Failed: ', errorInfo);
-    };
-
     const sendCode = () => {
       axios.post("http://localhost:8000/member/member/send-code", {
         mobile: loginForm.mobile
       }).then(response => {
         console.log(response);
+        let data = response.data;
+        if (data.success) {
+          notification.success({ description: "Verification code sent successfully!"});
+          loginForm.code = "8888";
+        } else {
+          notification.error({description: data.message});
+        }
       });
     };
 
+    const login = () => {
+      axios.post("http://localhost:8000/member/member/login", loginForm)
+          .then(response => {
+            let data = response.data;
+            if (data.success) {
+              notification.success({ description: "Login successfully!" });
+              console.log("Login successfully: ", data.content);
+            } else {
+              notification.error({ description: data.message });
+            }
+          });
+    }
+
     return {
       loginForm,
-      onFinish,
-      onFinishFailed,
       sendCode,
+      login
     };
   },
 });
