@@ -38,13 +38,16 @@
 </template>
 
 <script>
-import {defineComponent, reactive} from 'vue';
+import { defineComponent, reactive } from 'vue';
 import axios from "axios";
-import {notification} from "ant-design-vue";
+import { notification } from "ant-design-vue";
+import { useRouter } from "vue-router";
 
 export default defineComponent({
   name: "login-view",
   setup() {
+    const router = useRouter();
+
     const loginForm = reactive({
       mobile: '13000000000',
       code: '',
@@ -70,6 +73,7 @@ export default defineComponent({
             let data = response.data;
             if (data.success) {
               notification.success({ description: "Login successfully!" });
+              router.push("/");
             } else {
               notification.error({ description: data.message });
             }
