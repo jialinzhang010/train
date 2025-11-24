@@ -54,7 +54,6 @@ export default defineComponent({
       axios.post("http://localhost:8000/member/member/send-code", {
         mobile: loginForm.mobile
       }).then(response => {
-        console.log(response);
         let data = response.data;
         if (data.success) {
           notification.success({ description: "Verification code sent successfully!"});
@@ -71,7 +70,6 @@ export default defineComponent({
             let data = response.data;
             if (data.success) {
               notification.success({ description: "Login successfully!" });
-              console.log("Login successfully: ", data.content);
             } else {
               notification.error({ description: data.message });
             }

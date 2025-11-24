@@ -5,6 +5,7 @@ import store from './store'
 import Antd from 'ant-design-vue';
 import 'ant-design-vue/dist/antd.css';
 import * as Icons from '@ant-design/icons-vue';
+import axios from "axios";
 
 const app = createApp(App);
 
@@ -14,3 +15,17 @@ const icons = Icons;
 for (const i in icons) {
     app.component(i, icons[i]);
 }
+
+axios.interceptors.request.use(function (config) {
+    console.log("Request parameters: ", config);
+    return config;
+}, error => {
+    return Promise.reject(error);
+});
+axios.interceptors.response.use(function(response) {
+    console.log("Response: ", response);
+    return response;
+}, error => {
+    console.log("Error: ", error);
+    return Promise.reject(error);
+})
