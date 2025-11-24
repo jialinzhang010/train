@@ -2,9 +2,8 @@ package com.jialin.train.member.mapper;
 
 import com.jialin.train.member.domain.Member;
 import com.jialin.train.member.domain.MemberExample;
-import org.apache.ibatis.annotations.Param;
-
 import java.util.List;
+import org.apache.ibatis.annotations.Param;
 
 public interface MemberMapper {
     long countByExample(MemberExample example);
@@ -28,5 +27,4 @@ public interface MemberMapper {
     int updateByPrimaryKeySelective(Member record);
 
     int updateByPrimaryKey(Member record);
-
 }
