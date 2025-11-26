@@ -3,7 +3,7 @@
     <div class="logo" />
     <div style="float: right; color: white;">
       Hello, {{member.mobile}} &nbsp;&nbsp;
-      <router-link to="/login">
+      <router-link to="/login" style="color: white">
         Log out
       </router-link>
     </div>
