@@ -1,16 +1,23 @@
 package com.jialin.train.member.req;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 import java.util.Date;
 
 public class PassengerSaveReq {
     private Long id;
 
+    @NotNull(message = "[Member ID] must not be blank")
     private Long memberId;
 
+    @NotBlank(message = "[Name] must not be blank")
     private String name;
 
+    @NotBlank(message = "[ID card] must not be blank")
     private String idCard;
 
+    @NotBlank(message = "[Passenger type] must not be blank")
     private String type;
 
     private Date createTime;
