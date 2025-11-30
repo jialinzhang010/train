@@ -12,7 +12,7 @@
       </a-menu-item>
       <a-menu-item key="/passenger">
         <router-link to="/passenger">
-          <user-outlined /> &nbsp; Passenger
+          <user-outlined /> &nbsp; Passengers
         </router-link>
       </a-menu-item>
       <a-menu-item key="/ticket">
