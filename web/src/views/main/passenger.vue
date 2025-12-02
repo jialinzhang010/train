@@ -13,6 +13,12 @@
       <template #bodyCell="{ column, record }">
         <template v-if="column.dataIndex === 'operation'">
           <a-space>
+            <a-popconfirm
+                title="Deletion is irreversible. Confirm deletion?"
+                @confirm="onDelete(record)"
+                ok-text="Confirm" cancel-text="Cancel">
+              <a style="color: red">Delete</a>
+            </a-popconfirm>
             <a @click="onEdit(record)">Edit</a>
           </a-space>
         </template>
@@ -138,8 +144,23 @@ export default defineComponent({
 
     const handleTableChange = (pagination) => {
       handleQuery({
-        page: 1,
-        size: pagination.value.pageSize
+        page: pagination.current,
+        size: pagination.pageSize
+      });
+    };
+
+    const onDelete = (record) => {
+      axios.delete("/member/passenger/delete/" + record.id).then((response) => {
+        const data = response.data;
+        if (data.success) {
+          notification.success({description: "Deleted!"});
+          handleQuery({
+            page: pagination.value.current,
+            size: pagination.value.pageSize,
+          });
+        } else {
+          notification.error({description: data.message});
+        }
       });
     };
 
@@ -155,6 +176,7 @@ export default defineComponent({
       onAdd,
       onEdit,
       handleOk,
+      onDelete,
       passengers,
       columns,
       passenger,
