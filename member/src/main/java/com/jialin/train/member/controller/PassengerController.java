@@ -2,6 +2,7 @@ package com.jialin.train.member.controller;
 
 import com.jialin.train.common.context.LoginMemberContext;
 import com.jialin.train.common.resp.CommonResp;
+import com.jialin.train.common.resp.PageResp;
 import com.jialin.train.member.req.PassengerQueryReq;
 import com.jialin.train.member.req.PassengerSaveReq;
 import com.jialin.train.member.resp.PassengerQueryResp;
@@ -9,8 +10,6 @@ import com.jialin.train.member.service.PassengerService;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/passenger")
@@ -25,9 +24,9 @@ public class PassengerController {
     }
 
     @GetMapping("/query-list")
-    public CommonResp<List<PassengerQueryResp>> queryList(@Valid PassengerQueryReq req) {
+    public CommonResp<PageResp<PassengerQueryResp>> queryList(@Valid PassengerQueryReq req) {
         req.setMemberId(LoginMemberContext.getId());
-        List<PassengerQueryResp> list = passengerService.queryList(req);
+        PageResp<PassengerQueryResp> list = passengerService.queryList(req);
         return new CommonResp<>(list);
     }
 
