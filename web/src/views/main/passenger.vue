@@ -2,14 +2,23 @@
   <p>
     <a-space>
       <a-button type="primary" @click="handleQuery()">Refresh</a-button>
-      <a-button type="primary" @click="showModal">Add</a-button>
+      <a-button type="primary" @click="onAdd">Add</a-button>
     </a-space>
   </p>
     <a-table :dataSource="passengers"
              :columns="columns"
              :pagination="pagination"
              @change="handleTableChange"
-             :loading="loading"/>
+             :loading="loading">
+      <template #bodyCell="{ column, record }">
+        <template v-if="column.dataIndex === 'operation'">
+          <a-space>
+            <a @click="onEdit(record)">Edit</a>
+          </a-space>
+        </template>
+      </template>
+    </a-table>
+
     <a-modal v-model:visible="visible" title="Passenger" @ok="handleOk">
       <a-form :model="passenger" :label-col="{span: 4}" :wrapper-col="{ span: 20 }">
         <a-form-item label="Name">
@@ -30,15 +39,14 @@
 </template>
 
 <script>
-import {defineComponent, reactive, ref, onMounted} from "vue";
-// import passenger from "@/views/main/passenger.vue";
+import {defineComponent, ref, onMounted} from "vue";
 import axios from "axios";
 import {notification} from "ant-design-vue";
 
 export default defineComponent({
   setup() {
     const visible = ref(false);
-    const passenger = reactive({
+    const passenger = ref({
       id: undefined,
       memberId: undefined,
       name: undefined,
@@ -50,7 +58,7 @@ export default defineComponent({
 
     const passengers = ref([]);
 
-    const pagination = reactive({
+    const pagination = ref({
       total: 0,
       current: 1,
       pageSize: 2,
@@ -70,22 +78,31 @@ export default defineComponent({
       title: 'Type',
       dataIndex: 'type',
       key: 'type'
+    }, {
+      title: 'Operation',
+      dataIndex: 'operation'
     }];
 
-    const showModal = () => {
+    const onAdd = () => {
+      passenger.value = {};
       visible.value = true;
     };
 
+    const onEdit = (record) => {
+      passenger.value = window.Tool.copy(record);
+      visible.value = true;
+    }
+
     const handleOk = e => {
       console.log(e);
-      axios.post("/member/passenger/save", passenger).then((response) => {
+      axios.post("/member/passenger/save", passenger.value).then((response) => {
         let data = response.data;
         if (data.success) {
           notification.success({description: "Saved!"});
           visible.value = false;
           handleQuery({
-            page: pagination.current,
-            size: pagination.pageSize
+            page: pagination.value.current,
+            size: pagination.value.pageSize
           });
         } else {
           notification.error({description: data.message});
@@ -97,9 +114,9 @@ export default defineComponent({
       if (!param) {
         param = {
           page: 1,
-          size: pagination.pageSize
+          size: pagination.value.pageSize
         };
-      };
+      }
       loading.value = true;
       axios.get("/member/passenger/query-list", {
         params: {
@@ -111,8 +128,8 @@ export default defineComponent({
         let data = response.data;
         if (data.success) {
           passengers.value = data.content.list;
-          pagination.current = param.page;
-          pagination.total = data.content.total;
+          pagination.value.current = param.page;
+          pagination.value.total = data.content.total;
         } else {
           notification.error({description: data.message})
         }
@@ -121,21 +138,22 @@ export default defineComponent({
 
     const handleTableChange = (pagination) => {
       handleQuery({
-        page: pagination.current,
-        size: pagination.pageSize
+        page: 1,
+        size: pagination.value.pageSize
       });
     };
 
     onMounted(() => {
       handleQuery({
         page: 1,
-        size: pagination.pageSize
+        size: pagination.value.pageSize
       });
     });
 
     return {
       visible,
-      showModal,
+      onAdd,
+      onEdit,
       handleOk,
       passengers,
       columns,

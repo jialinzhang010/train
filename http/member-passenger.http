@@ -27,6 +27,10 @@ GET http://localhost:8000/member/passenger/query-list?page=2&size=2
 Accept: application/json
 token: {{token}}
 
-
-
 ###
+
+DELETE http://localhost:8000/member/passenger/delete/1995995223381118976
+Accept: application/json
+token: {{token}}
+
+####
