@@ -5,7 +5,20 @@ token: {{token}}
 {
   "name": "Vivian",
   "idCard": "110102198702121234",
-  "type": "2"
+  "type": "3"
+}
+
+###
+POST http://localhost:8000/member/passenger/save
+Content-Type: application/json
+token: {{token}}
+
+{
+  "id": 1995987232938397696,
+  "memberId": 1992857866293350400,
+  "name": "Vivian",
+  "idCard": "110102198702121234",
+  "type": "3"
 }
 
 
