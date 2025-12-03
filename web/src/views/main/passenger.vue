@@ -22,26 +22,34 @@
             <a @click="onEdit(record)">Edit</a>
           </a-space>
         </template>
+        <template v-else-if="column.dataIndex === 'type'">
+        <span v-for="item in PASSENGER_TYPE_ARRAY" :key="item.code">
+          <span v-if="item.code === record.type">
+            {{item.desc}}
+          </span>
+        </span>
+        </template>
       </template>
     </a-table>
 
-    <a-modal v-model:visible="visible" title="Passenger" @ok="handleOk">
-      <a-form :model="passenger" :label-col="{span: 4}" :wrapper-col="{ span: 20 }">
-        <a-form-item label="Name">
-          <a-input v-model:value="passenger.name" />
-        </a-form-item>
-        <a-form-item label="ID">
-          <a-input v-model:value="passenger.idCard" />
-        </a-form-item>
-        <a-form-item label="Type">
-            <a-select v-model:value="passenger.type">
-              <a-select-option value="1">Adult</a-select-option>
-              <a-select-option value="2">Child</a-select-option>
-              <a-select-option value="3">Student</a-select-option>
-            </a-select>
-        </a-form-item>
-      </a-form>
-      </a-modal>
+  <a-modal v-model:visible="visible" title="Passenger" @ok="handleOk"
+           ok-text="OK" cancel-text="Cancel">
+    <a-form :model="passenger" :label-col="{span: 4}" :wrapper-col="{ span: 20 }">
+      <a-form-item label="Name">
+        <a-input v-model:value="passenger.name" />
+      </a-form-item>
+      <a-form-item label="ID">
+        <a-input v-model:value="passenger.idCard" />
+      </a-form-item>
+      <a-form-item label="Type">
+        <a-select v-model:value="passenger.type">
+          <a-select-option v-for="item in PASSENGER_TYPE_ARRAY" :key="item.code" :value="item.code">
+            {{item.desc}}
+          </a-select-option>
+        </a-select>
+      </a-form-item>
+    </a-form>
+  </a-modal>
 </template>
 
 <script>
@@ -51,6 +59,7 @@ import {notification} from "ant-design-vue";
 
 export default defineComponent({
   setup() {
+    const PASSENGER_TYPE_ARRAY = window.PASSENGER_TYPE_ARRAY;
     const visible = ref(false);
     const passenger = ref({
       id: undefined,
@@ -183,7 +192,8 @@ export default defineComponent({
       pagination,
       handleTableChange,
       handleQuery,
-      loading
+      loading,
+      PASSENGER_TYPE_ARRAY
     };
   }
 })
