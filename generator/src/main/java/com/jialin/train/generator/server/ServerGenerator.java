@@ -1,5 +1,7 @@
 package com.jialin.train.generator.server;
 
+import com.jialin.train.generator.util.DbUtil;
+import com.jialin.train.generator.util.Field;
 import com.jialin.train.generator.util.FreemarkerUtil;
 import freemarker.template.TemplateException;
 import org.dom4j.Document;
@@ -10,6 +12,7 @@ import org.dom4j.io.SAXReader;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public class ServerGenerator {
@@ -35,10 +38,22 @@ public class ServerGenerator {
         Node domainObjectName = table.selectSingleNode("@domainObjectName");
         System.out.println(tableName.getText() + "/" + domainObjectName.getText());
 
+        Node connectionURL = document.selectSingleNode("//@connectionURL");
+        Node userId = document.selectSingleNode("//@userId");
+        Node password = document.selectSingleNode("//@password");
+        System.out.println("connectionURL: " + connectionURL.getText());
+        System.out.println("userId: " + userId.getText());
+        System.out.println("password: " + password.getText());
+        DbUtil.url = connectionURL.getText();
+        DbUtil.user = userId.getText();
+        DbUtil.password = password.getText();
+
         String Domain = domainObjectName.getText();
         String domain = Domain.substring(0, 1).toLowerCase() + Domain.substring(1);
         String do_main = tableName.getText().replaceAll("_", "-");
 
+        String tableNameCn = DbUtil.getTableComment(tableName.getText());
+        List<Field> fieldList = DbUtil.getColumnByTableName(tableName.getText());
 
         Map<String, Object> param = new HashMap<>();
         param.put("Domain", Domain);
@@ -47,8 +62,8 @@ public class ServerGenerator {
         param.put("module", module);
         System.out.println("param: " + param);
 
-        gen(Domain, param, "service");
-        gen(domain, param, "controller");
+//        gen(Domain, param, "service");
+//        gen(domain, param, "controller");
     }
 
     private static void gen(String Domain, Map<String, Object> param, String target) throws IOException, TemplateException {
