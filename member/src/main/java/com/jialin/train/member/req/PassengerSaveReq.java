@@ -6,23 +6,45 @@ import jakarta.validation.constraints.NotBlank;
 import java.util.Date;
 
 public class PassengerSaveReq {
+
+    /**
+     * id
+     */
     private Long id;
 
+    /**
+     * member id
+     */
     private Long memberId;
 
-    @NotBlank(message = "[Name] must not be blank")
+    /**
+     * name
+     */
+    @NotBlank(message = "[name] cannot be empty")
     private String name;
 
-    @NotBlank(message = "[ID card] must not be blank")
+    /**
+     * ID card
+     */
+    @NotBlank(message = "[ID card] cannot be empty")
     private String idCard;
 
-    @NotBlank(message = "[Passenger type] must not be blank")
+    /**
+     * passenger type|enum[PassengerTypeEnum]
+     */
+    @NotBlank(message = "[passenger type] cannot be empty")
     private String type;
 
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone = "GMT-8")
+    /**
+     * create time
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private Date createTime;
 
-    @JsonFormat(pattern="yyyy-MM-dd HH:mm:ss", timezone = "GMT-8")
+    /**
+     * update time
+     */
+    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss",timezone = "GMT+8")
     private Date updateTime;
 
     public Long getId() {
