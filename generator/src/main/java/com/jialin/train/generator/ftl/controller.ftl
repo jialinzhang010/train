@@ -1,12 +1,12 @@
-package com.jialin.train.member.controller;
+package com.jialin.train.${module}.controller;
 
 import com.jialin.train.common.context.LoginMemberContext;
 import com.jialin.train.common.resp.CommonResp;
 import com.jialin.train.common.resp.PageResp;
-import com.jialin.train.member.req.${Domain}QueryReq;
-import com.jialin.train.member.req.${Domain}SaveReq;
-import com.jialin.train.member.resp.${Domain}QueryResp;
-import com.jialin.train.member.service.${Domain}Service;
+import com.jialin.train.${module}.req.${Domain}QueryReq;
+import com.jialin.train.${module}.req.${Domain}SaveReq;
+import com.jialin.train.${module}.resp.${Domain}QueryResp;
+import com.jialin.train.${module}.service.${Domain}Service;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
