@@ -1,5 +1,6 @@
 package com.jialin.train.generator.server;
 
+import com.jialin.train.generator.util.FreemarkerUtil;
 import org.dom4j.Document;
 import org.dom4j.DocumentException;
 import org.dom4j.Node;
@@ -10,14 +11,20 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class ServerGenerator {
-    static String toPath = "generator/src/main/java/com/jialin/train/generator/";
+    static String servicePath = "[module]/src/main/java/com/jialin/train/[module]/service/";
     static String pomPath = "generator/pom.xml";
     static {
-        new File(toPath).mkdirs();
+        new File(servicePath).mkdirs();
     }
 
     public static void main(String[] args) throws Exception {
+        // Get mybatis-generator
         String generatorPath = getGeneratorPath();
+
+        String module = generatorPath.replace("src/main/resources/generator-config-", "").replace(".xml", "");
+        System.out.println("module: " + module);
+        servicePath = servicePath.replace("[module]", module);
+        System.out.println("servicePath: " + servicePath);
 
         Document document = new SAXReader().read("generator/" + generatorPath);
         Node table = document.selectSingleNode("//table");
@@ -25,6 +32,21 @@ public class ServerGenerator {
         Node tableName = table.selectSingleNode("@tableName");
         Node domainObjectName = table.selectSingleNode("@domainObjectName");
         System.out.println(tableName.getText() + "/" + domainObjectName.getText());
+
+        String Domain = domainObjectName.getText();
+        String domain = Domain.substring(0, 1).toLowerCase() + Domain.substring(1);
+        String do_main = tableName.getText().replaceAll("_", "-");
+
+
+        Map<String, Object> param = new HashMap<>();
+        param.put("Domain", Domain);
+        param.put("domain", domain);
+        param.put("do_main", do_main);
+        param.put("module", module);
+        System.out.println("param: " + param);
+
+        FreemarkerUtil.initConfig("service.ftl");
+        FreemarkerUtil.generator(servicePath + Domain + "Service.java", param);
     }
 
     private static String getGeneratorPath() throws DocumentException {
