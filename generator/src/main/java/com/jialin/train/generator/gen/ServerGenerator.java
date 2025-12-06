@@ -1,4 +1,4 @@
-package com.jialin.train.generator.server;
+package com.jialin.train.generator.gen;
 
 import com.jialin.train.generator.util.DbUtil;
 import com.jialin.train.generator.util.Field;
