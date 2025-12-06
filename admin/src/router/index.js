@@ -1,12 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import store from "@/store";
-import {notification} from "ant-design-vue";
-
 const routes = [
-  {
-    path: '/login',
-    component: () => import('../views/login.vue')
-  },
   {
     path: '/',
     component: () => import('../views/main.vue'),
@@ -19,8 +12,8 @@ const routes = [
           component: () => import ('../views/main/welcome.vue'),
         },
         {
-          path: 'passenger',
-          component: () => import ('../views/main/passenger.vue'),
+          path: 'about',
+          component: () => import ('../views/main/about.vue'),
         },
     ]
   },
@@ -36,23 +29,5 @@ const router = createRouter({
   routes
 })
 
-router.beforeEach((to, from, next) => {
-  if (to.matched.some(function(item) {
-    console.log(item, "Require login verification or not: ", item.meta.requireLogin || false);
-    return item.meta.requireLogin;
-  })) {
-    const _member = store.state.member;
-    console.log("Start login verification: ", _member);
-    if (!_member.token) {
-      console.log("User did not log in or session expired!");
-      notification.error({ description: "Not logged in or session expired" });
-      next("/login");
-    } else {
-      next();
-    }
-  } else {
-    next();
-  }
-})
 
 export default router

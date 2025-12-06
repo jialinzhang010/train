@@ -10,31 +10,13 @@
           <coffee-outlined /> &nbsp; Welcome
         </router-link>
       </a-menu-item>
-      <a-menu-item key="/passenger">
-        <router-link to="/passenger">
-          <user-outlined /> &nbsp; Passengers
+
+      <a-menu-item key="/about">
+        <router-link to="/about">
+          <coffee-outlined /> &nbsp; About
         </router-link>
       </a-menu-item>
-      <a-menu-item key="/ticket">
-        <router-link to="/ticket">
-          <border-outer-outlined /> &nbsp; Tickets
-        </router-link>
-      </a-menu-item>
-      <a-menu-item key="/my-ticket">
-        <router-link to="/my-ticket">
-          <idcard-outlined /> &nbsp; My tickets
-        </router-link>
-      </a-menu-item>
-      <a-menu-item key="/seat">
-        <router-link to="/seat">
-          <usergroup-add-outlined /> &nbsp; Seats
-        </router-link>
-      </a-menu-item>
-      <a-menu-item key="/admin">
-        <router-link to="/admin">
-          <desktop-outlined /> &nbsp; Admin
-        </router-link>
-      </a-menu-item>
+
     </a-menu>
   </a-layout-sider>
 </template>
