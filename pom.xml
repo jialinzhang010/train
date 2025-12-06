@@ -26,6 +26,7 @@
         <module>common</module>
         <module>gateway</module>
         <module>generator</module>
+        <module>admin</module>
     </modules>
     <scm>
         <connection/>
