@@ -2,16 +2,17 @@
   <p>
     <a-space>
       <a-button type="primary" @click="handleQuery()">Refresh</a-button>
-      <a-button type="primary" @click="onAdd">Add</a-button>
+      <#if !readOnly><a-button type="primary" @click="onAdd">Add</a-button></#if>
     </a-space>
   </p>
-  <a-table :dataSource="passengers"
+  <a-table :dataSource="${domain}s"
            :columns="columns"
            :pagination="pagination"
            @change="handleTableChange"
            :loading="loading">
     <template #bodyCell="{ column, record }">
       <template v-if="column.dataIndex === 'operation'">
+        <#if !readOnly>
         <a-space>
           <a-popconfirm
               title="Deletion is irreversible. Confirm deletion?"
@@ -21,34 +22,51 @@
           </a-popconfirm>
           <a @click="onEdit(record)">Edit</a>
         </a-space>
+        </#if>
       </template>
-      <template v-else-if="column.dataIndex === 'type'">
-        <span v-for="item in PASSENGER_TYPE_ARRAY" :key="item.code">
-          <span v-if="item.code === record.type">
+      <#list fieldList as field>
+        <#if field.enums>
+      <template v-else-if="column.dataIndex === '${field.nameHump}'">
+        <span v-for="item in ${field.enumsConst}_ARRAY" :key="item.code">
+          <span v-if="item.code === record.${field.nameHump}">
             {{item.desc}}
           </span>
         </span>
       </template>
+        </#if>
+      </#list>
     </template>
   </a-table>
-  <a-modal v-model:visible="visible" title="passenger" @ok="handleOk"
+  <#if !readOnly>
+  <a-modal v-model:visible="visible" title="${tableNameCn}" @ok="handleOk"
            ok-text="Confirm" cancel-text="Cancel">
-    <a-form :model="passenger" :label-col="{span: 4}" :wrapper-col="{ span: 20 }">
-      <a-form-item label="name">
-        <a-input v-model:value="passenger.name" />
-      </a-form-item>
-      <a-form-item label="ID card">
-        <a-input v-model:value="passenger.idCard" />
-      </a-form-item>
-      <a-form-item label="Type">
-        <a-select v-model:value="passenger.type">
-          <a-select-option v-for="item in PASSENGER_TYPE_ARRAY" :key="item.code" :value="item.code">
+    <a-form :model="${domain}" :label-col="{span: 4}" :wrapper-col="{ span: 20 }">
+      <#list fieldList as field>
+        <#if field.name!="id" && field.nameHump!="createTime" && field.nameHump!="updateTime">
+      <a-form-item label="${field.nameCn}">
+        <#if field.enums>
+        <a-select v-model:value="${domain}.${field.nameHump}">
+          <a-select-option v-for="item in ${field.enumsConst}_ARRAY" :key="item.code" :value="item.code">
             {{item.desc}}
           </a-select-option>
         </a-select>
+        <#elseif field.javaType=='Date'>
+          <#if field.type=='time'>
+        <a-time-picker v-model:value="${domain}.${field.nameHump}" valueFormat="HH:mm:ss" placeholder="Please select a time" />
+          <#elseif field.type=='date'>
+        <a-date-picker v-model:value="${domain}.${field.nameHump}" valueFormat="YYYY-MM-DD" placeholder="Please select a time" />
+          <#else>
+        <a-date-picker v-model:value="${domain}.${field.nameHump}" valueFormat="YYYY-MM-DD HH:mm:ss" show-time placeholder="Please select a time" />
+          </#if>
+        <#else>
+        <a-input v-model:value="${domain}.${field.nameHump}" />
+        </#if>
       </a-form-item>
+        </#if>
+      </#list>
     </a-form>
   </a-modal>
+  </#if>
 </template>
 
 <script>
@@ -57,20 +75,20 @@ import {notification} from "ant-design-vue";
 import axios from "axios";
 
 export default defineComponent({
-  name: "passenger-view",
+  name: "${do_main}-view",
   setup() {
-    const PASSENGER_TYPE_ARRAY = window.PASSENGER_TYPE_ARRAY;
+    <#list fieldList as field>
+    <#if field.enums>
+    const ${field.enumsConst}_ARRAY = window.${field.enumsConst}_ARRAY;
+    </#if>
+    </#list>
     const visible = ref(false);
-    let passenger = ref({
-      id: undefined,
-      memberId: undefined,
-      name: undefined,
-      idCard: undefined,
-      type: undefined,
-      createTime: undefined,
-      updateTime: undefined,
+    let ${domain} = ref({
+      <#list fieldList as field>
+      ${field.nameHump}: undefined,
+      </#list>
     });
-    const passengers = ref([]);
+    const ${domain}s = ref([]);
     const pagination = ref({
       total: 0,
       current: 1,
@@ -78,39 +96,36 @@ export default defineComponent({
     });
     let loading = ref(false);
     const columns = [
+    <#list fieldList as field>
+      <#if field.name!="id" && field.nameHump!="createTime" && field.nameHump!="updateTime">
     {
-      title: 'name',
-      dataIndex: 'name',
-      key: 'name',
+      title: '${field.nameCn}',
+      dataIndex: '${field.nameHump}',
+      key: '${field.nameHump}',
     },
-    {
-      title: 'ID card',
-      dataIndex: 'idCard',
-      key: 'idCard',
-    },
-    {
-      title: 'Passenger Type',
-      dataIndex: 'type',
-      key: 'type',
-    },
+      </#if>
+    </#list>
+    <#if !readOnly>
     {
       title: 'Operation',
       dataIndex: 'operation'
     }
+    </#if>
     ];
 
+    <#if !readOnly>
     const onAdd = () => {
-      passenger.value = {};
+      ${domain}.value = {};
       visible.value = true;
     };
 
     const onEdit = (record) => {
-      passenger.value = window.Tool.copy(record);
+      ${domain}.value = window.Tool.copy(record);
       visible.value = true;
     };
 
     const onDelete = (record) => {
-      axios.delete("/member/passenger/delete/" + record.id).then((response) => {
+      axios.delete("/${module}/${do_main}/delete/" + record.id).then((response) => {
         const data = response.data;
         if (data.success) {
           notification.success({description: "Deleted!"});
@@ -125,7 +140,7 @@ export default defineComponent({
     };
 
     const handleOk = () => {
-      axios.post("/member/passenger/save", passenger.value).then((response) => {
+      axios.post("/${module}/${do_main}/save", ${domain}.value).then((response) => {
         let data = response.data;
         if (data.success) {
           notification.success({description: "Saved!"});
@@ -139,6 +154,7 @@ export default defineComponent({
         }
       });
     };
+    </#if>
 
     const handleQuery = (param) => {
       if (!param) {
@@ -148,7 +164,7 @@ export default defineComponent({
         };
       }
       loading.value = true;
-      axios.get("/member/passenger/query-list", {
+      axios.get("/${module}/${do_main}/query-list", {
         params: {
           page: param.page,
           size: param.size
@@ -157,7 +173,7 @@ export default defineComponent({
         loading.value = false;
         let data = response.data;
         if (data.success) {
-          passengers.value = data.content.list;
+          ${domain}s.value = data.content.list;
           pagination.value.current = param.page;
           pagination.value.total = data.content.total;
         } else {
@@ -182,19 +198,25 @@ export default defineComponent({
     });
 
     return {
-      PASSENGER_TYPE_ARRAY,
-      passenger,
+      <#list fieldList as field>
+      <#if field.enums>
+      ${field.enumsConst}_ARRAY,
+      </#if>
+      </#list>
+      ${domain},
       visible,
-      passengers,
+      ${domain}s,
       pagination,
       columns,
       handleTableChange,
       handleQuery,
       loading,
+      <#if !readOnly>
       onAdd,
       handleOk,
       onEdit,
       onDelete
+      </#if>
     };
   },
 });
