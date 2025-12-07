@@ -1,4 +1,4 @@
-package com.jialin.train.${module}.controller;
+package com.jialin.train.${module}.controller.admin;
 
 import com.jialin.train.common.context.LoginMemberContext;
 import com.jialin.train.common.resp.CommonResp;
@@ -12,8 +12,8 @@ import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/${domain}")
-public class ${Domain}Controller {
+@RequestMapping("/admin/${domain}")
+public class ${Domain}AdminController {
     @Resource
     private ${Domain}Service ${domain}Service;
 
