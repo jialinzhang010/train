@@ -30,19 +30,19 @@
         </jdbcConnection>
 
         <!-- Location of the domain class. targetProject is a path relative to the pom.xml-->
-        <javaModelGenerator targetProject="../member/src/main/java"
-                            targetPackage="com.jialin.train.member.domain"/>
+        <javaModelGenerator targetProject="../business/src/main/java"
+                            targetPackage="com.jialin.train.business.domain"/>
 
         <!-- Location of the Mapper XML. targetProject is a path relative to the pom.xml -->
-        <sqlMapGenerator targetProject="../member/src/main/resources"
+        <sqlMapGenerator targetProject="../business/src/main/resources"
                          targetPackage="mapper"/>
 
         <!-- Location of the Mapper class. targetProject is a path relative to the pom.xml -->
-        <javaClientGenerator targetProject="../member/src/main/java"
-                             targetPackage="com.jialin.train.member.mapper"
+        <javaClientGenerator targetProject="../business/src/main/java"
+                             targetPackage="com.jialin.train.business.mapper"
                              type="XMLMAPPER"/>
 
-        <!--<table tableName="member" domainObjectName="Member"/>-->
-        <table tableName="passenger" domainObjectName="Passenger"/>
+        <!--<table tableName="business" domainObjectName="Business"/>-->
+        <table tableName="member" domainObjectName="Member"/>
     </context>
 </generatorConfiguration>
