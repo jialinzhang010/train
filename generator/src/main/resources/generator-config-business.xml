@@ -43,6 +43,6 @@
                              type="XMLMAPPER"/>
 
         <!--<table tableName="business" domainObjectName="Business"/>-->
-        <table tableName="member" domainObjectName="Member"/>
+        <table tableName="station" domainObjectName="Station"/>
     </context>
 </generatorConfiguration>
