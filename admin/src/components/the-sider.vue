@@ -21,6 +21,12 @@
         <router-link to="/station">
           <coffee-outlined /> &nbsp; Manage Stations
         </router-link>
+
+      </a-menu-item>
+      <a-menu-item key="/train">
+        <router-link to="/train">
+          <coffee-outlined /> &nbsp; Manage Trains
+        </router-link>
       </a-menu-item>
 
     </a-menu>

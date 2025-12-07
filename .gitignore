@@ -34,3 +34,4 @@ build/
 
 ### Log ###
 log/
+/*/${project.build.directory}/
