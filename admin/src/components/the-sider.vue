@@ -41,6 +41,12 @@
         </router-link>
       </a-menu-item>
 
+      <a-menu-item key="/train-seat">
+        <router-link to="/train-seat">
+          <coffee-outlined /> &nbsp; Train Seats
+        </router-link>
+      </a-menu-item>
+
     </a-menu>
   </a-layout-sider>
 </template>
