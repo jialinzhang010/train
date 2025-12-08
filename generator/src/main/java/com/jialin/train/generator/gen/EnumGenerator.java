@@ -2,6 +2,7 @@ package com.jialin.train.generator.gen;
 
 
 import cn.hutool.core.util.StrUtil;
+import com.jialin.train.business.enums.SeatTypeEnum;
 import com.jialin.train.business.enums.TrainTypeEnum;
 import com.jialin.train.member.enums.PassengerTypeEnum;
 
@@ -16,7 +17,6 @@ import java.util.List;
 
 public class EnumGenerator {
      static String path = "admin/src/assets/js/enums.js";
-//    static String path = "admin/src/assets/js/enums.js";
 
     public static void main(String[] args) {
         StringBuffer bufferObject = new StringBuffer();
@@ -25,6 +25,7 @@ public class EnumGenerator {
         try {
             toJson(PassengerTypeEnum.class, bufferObject, bufferArray);
             toJson(TrainTypeEnum.class, bufferObject, bufferArray);
+            toJson(SeatTypeEnum.class, bufferObject, bufferArray);
 
             StringBuffer buffer = bufferObject.append("\r\n").append(bufferArray);
             writeJs(buffer);

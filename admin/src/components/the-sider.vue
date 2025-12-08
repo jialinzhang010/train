@@ -35,6 +35,12 @@
         </router-link>
       </a-menu-item>
 
+      <a-menu-item key="/train-carriage">
+        <router-link to="/train-carriage">
+          <coffee-outlined /> &nbsp; Manage Train Carriages
+        </router-link>
+      </a-menu-item>
+
     </a-menu>
   </a-layout-sider>
 </template>
