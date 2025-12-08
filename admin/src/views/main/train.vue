@@ -31,13 +31,13 @@
       </template>
     </template>
   </a-table>
-  <a-modal v-model:visible="visible" title="Train number" @ok="handleOk"
+  <a-modal v-model:visible="visible" title="Train code" @ok="handleOk"
            ok-text="Confirm" cancel-text="Cancel">
     <a-form :model="train" :label-col="{span: 4}" :wrapper-col="{ span: 20 }">
-      <a-form-item label="Train number">
+      <a-form-item label="Train code">
         <a-input v-model:value="train.code" />
       </a-form-item>
-      <a-form-item label="Train Type ">
+      <a-form-item label="Train type">
         <a-select v-model:value="train.type">
           <a-select-option v-for="item in TRAIN_TYPE_ARRAY" :key="item.code" :value="item.code">
             {{item.desc}}
@@ -90,12 +90,12 @@ export default defineComponent({
     let loading = ref(false);
     const columns = [
     {
-      title: 'Train number',
+      title: 'Train code',
       dataIndex: 'code',
       key: 'code',
     },
     {
-      title: 'Train Type ',
+      title: 'Train type ',
       dataIndex: 'type',
       key: 'type',
     },
