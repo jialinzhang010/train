@@ -1,11 +1,11 @@
 package com.jialin.train.business.controller.admin;
 
-import com.jialin.train.common.resp.CommonResp;
-import com.jialin.train.common.resp.PageResp;
 import com.jialin.train.business.req.TrainCarriageQueryReq;
 import com.jialin.train.business.req.TrainCarriageSaveReq;
 import com.jialin.train.business.resp.TrainCarriageQueryResp;
 import com.jialin.train.business.service.TrainCarriageService;
+import com.jialin.train.common.resp.CommonResp;
+import com.jialin.train.common.resp.PageResp;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;

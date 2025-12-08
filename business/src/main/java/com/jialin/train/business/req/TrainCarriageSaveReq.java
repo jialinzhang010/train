@@ -47,7 +47,7 @@ public class TrainCarriageSaveReq {
      * Column count
      */
     @NotNull(message = "[Column count] cannot be empty")
-    private Integer columnCount;
+    private Integer colCount;
 
     /**
      * Create time
@@ -109,12 +109,12 @@ public class TrainCarriageSaveReq {
         this.rowCount = rowCount;
     }
 
-    public Integer getColumnCount() {
-        return columnCount;
+    public Integer getColCount() {
+        return colCount;
     }
 
-    public void setColumnCount(Integer columnCount) {
-        this.columnCount = columnCount;
+    public void setColCount(Integer colCount) {
+        this.colCount = colCount;
     }
 
     public Date getCreateTime() {
@@ -145,7 +145,7 @@ public class TrainCarriageSaveReq {
         sb.append(", seatType=").append(seatType);
         sb.append(", seatCount=").append(seatCount);
         sb.append(", rowCount=").append(rowCount);
-        sb.append(", columnCount=").append(columnCount);
+        sb.append(", colCount=").append(colCount);
         sb.append(", createTime=").append(createTime);
         sb.append(", updateTime=").append(updateTime);
         sb.append("]");

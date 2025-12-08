@@ -56,9 +56,23 @@ create table `train_carriage` (
     `seat_type` char(1) not null comment 'Seat type | Enum[SeatTypeEnum]',
     `seat_count` int not null comment 'Seat count',
     `row_count` int not null comment 'Row count',
-    `column_count` int not null comment 'Column count',
+    `col_count` int not null comment 'Column count',
     `create_time` datetime(3) comment 'Create time',
     `update_time` datetime(3) comment 'Update time',
     unique key `train_code_index_unique` (`train_code`, `index`),
     primary key (`id`)
 ) engine=innodb default charset=utf8mb4 comment='Train carriage';
+
+drop table if exists `train_seat`;
+create table `train_seat` (
+    `id` bigint not null comment 'id',
+    `train_code` varchar(20) not null comment 'Train code',
+    `carriage_index` int not null comment 'Carriage index',
+    `row` char(2) not null comment 'Row number | 01, 02',
+    `col` char(1) not null comment 'Column number | Enum[SeatColEnum]',
+    `seat_type` char(1) not null comment 'Seat type | Enum[SeatTypeEnum]',
+    `carriage_seat_index` int not null comment 'Carriage seat index',
+    `create_time` datetime(3) comment 'Create time',
+    `update_time` datetime(3) comment 'Update time',
+    primary key (`id`)
+) engine=innodb default charset=utf8mb4 comment='Seat';

@@ -19,25 +19,25 @@
 
       <a-menu-item key="/station">
         <router-link to="/station">
-          <coffee-outlined /> &nbsp; Manage Stations
+          <coffee-outlined /> &nbsp; Stations
         </router-link>
       </a-menu-item>
 
       <a-menu-item key="/train">
         <router-link to="/train">
-          <coffee-outlined /> &nbsp; Manage Trains
+          <coffee-outlined /> &nbsp; Trains
         </router-link>
       </a-menu-item>
 
       <a-menu-item key="/train-station">
         <router-link to="/train-station">
-          <coffee-outlined /> &nbsp; Manage Train Stations
+          <coffee-outlined /> &nbsp; Train Stations
         </router-link>
       </a-menu-item>
 
       <a-menu-item key="/train-carriage">
         <router-link to="/train-carriage">
-          <coffee-outlined /> &nbsp; Manage Train Carriages
+          <coffee-outlined /> &nbsp; Train Carriages
         </router-link>
       </a-menu-item>
 
