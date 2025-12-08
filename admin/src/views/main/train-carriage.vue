@@ -35,7 +35,7 @@
            ok-text="Confirm" cancel-text="Cancel">
     <a-form :model="trainCarriage" :label-col="{span: 4}" :wrapper-col="{ span: 20 }">
       <a-form-item label="Train code">
-        <a-input v-model:value="trainCarriage.trainCode" />
+        <train-select-view v-model="trainCarriage.trainCode"></train-select-view>
       </a-form-item>
       <a-form-item label="Carriage number">
         <a-input v-model:value="trainCarriage.index" />
@@ -64,9 +64,17 @@
 import { defineComponent, ref, onMounted } from 'vue';
 import {notification} from "ant-design-vue";
 import axios from "axios";
+import TrainSelectView from "@/components/train-select.vue";
+import trainStation from "@/views/main/train-station.vue";
 
 export default defineComponent({
   name: "train-carriage-view",
+  computed: {
+    trainStation() {
+      return trainStation
+    }
+  },
+  components: {TrainSelectView},
   setup() {
     const SEAT_TYPE_ARRAY = window.SEAT_TYPE_ARRAY;
     const visible = ref(false);
