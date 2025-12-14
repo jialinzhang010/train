@@ -40,7 +40,7 @@
   </a-table>
   <a-modal v-model:visible="visible" title="Seat" @ok="handleOk"
            ok-text="Confirm" cancel-text="Cancel">
-    <a-form :model="trainSeat" :label-col="{span: 4}" :wrapper-col="{ span: 20 }">
+    <a-form :model="trainSeat" :label-col="{span: 7}" :wrapper-col="{ span: 20 }">
       <a-form-item label="Train code">
         <train-select-view v-model="trainSeat.trainCode"></train-select-view>
       </a-form-item>

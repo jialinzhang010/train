@@ -33,7 +33,7 @@
   </a-table>
   <a-modal v-model:visible="visible" title="Train code" @ok="handleOk"
            ok-text="Confirm" cancel-text="Cancel">
-    <a-form :model="train" :label-col="{span: 4}" :wrapper-col="{ span: 20 }">
+    <a-form :model="train" :label-col="{span: 7}" :wrapper-col="{ span: 20 }">
       <a-form-item label="Train code">
         <a-input v-model:value="train.code" />
       </a-form-item>
@@ -45,13 +45,13 @@
         </a-select>
       </a-form-item>
       <a-form-item label="Departure station">
-        <a-input v-model:value="train.start" />
+        <station-select-view v-model="train.start"></station-select-view>
       </a-form-item>
       <a-form-item label="Departure time">
         <a-time-picker v-model:value="train.startTime" valueFormat="HH:mm:ss" placeholder="Please select a time" />
       </a-form-item>
       <a-form-item label="Terminal station">
-        <a-input v-model:value="train.end" />
+        <station-select-view v-model="train.end"></station-select-view>
       </a-form-item>
       <a-form-item label="Arrival time">
         <a-time-picker v-model:value="train.endTime" valueFormat="HH:mm:ss" placeholder="Please select a time" />
@@ -64,9 +64,12 @@
 import { defineComponent, ref, onMounted } from 'vue';
 import {notification} from "ant-design-vue";
 import axios from "axios";
+import StationSelectView from "@/components/station-select.vue";
+import TrainSelectView from "@/components/train-select.vue";
 
 export default defineComponent({
   name: "train-view",
+  components: {TrainSelectView, StationSelectView},
   setup() {
     const TRAIN_TYPE_ARRAY = window.TRAIN_TYPE_ARRAY;
     const visible = ref(false);
