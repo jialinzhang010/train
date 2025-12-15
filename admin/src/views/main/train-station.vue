@@ -44,7 +44,7 @@
         <a-time-picker v-model:value="trainStation.outTime" valueFormat="HH:mm:ss" placeholder="Please select a time" />
       </a-form-item>
       <a-form-item label="Dwell time">
-        <a-time-picker v-model:value="trainStation.stopTime" valueFormat="HH:mm:ss" placeholder="Please select a time" />
+        <a-time-picker v-model:value="trainStation.stopTime" valueFormat="HH:mm:ss" placeholder="Please select a time" disabled/>
       </a-form-item>
       <a-form-item label="Distance">
         <a-input v-model:value="trainStation.km" />
@@ -54,11 +54,12 @@
 </template>
 
 <script>
-import { defineComponent, ref, onMounted } from 'vue';
+import {defineComponent, ref, onMounted, watch} from 'vue';
 import {notification} from "ant-design-vue";
 import axios from "axios";
 import TrainSelectView from "@/components/train-select";
 import StationSelectView from "@/components/station-select.vue";
+import dayjs from 'dayjs';
 
 export default defineComponent({
   name: "train-station-view",
@@ -128,6 +129,16 @@ export default defineComponent({
       dataIndex: 'operation'
     }
     ];
+
+    watch(() => trainStation.value.inTime, () => {
+      let diff = dayjs(trainStation.value.outTime, 'HH:mm:ss').diff(dayjs(trainStation.value.inTime, 'HH:mm:ss'), 'seconds');
+      trainStation.value.stopTime = dayjs('00:00:00', 'HH:mm:ss').second(diff).format('HH:mm:ss');
+    }, {immediate: true});
+
+    watch(() => trainStation.value.outTime, () => {
+      let diff = dayjs(trainStation.value.outTime, 'HH:mm:ss').diff(dayjs(trainStation.value.inTime, 'HH:mm:ss'), 'seconds');
+      trainStation.value.stopTime = dayjs('00:00:00', 'HH:mm:ss').second(diff).format('HH:mm:ss');
+    }, {immediate: true});
 
     const onAdd = () => {
       trainStation.value = {};
