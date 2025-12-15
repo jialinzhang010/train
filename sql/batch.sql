@@ -1,7 +1,163 @@
-drop table if exists `member`;
-create table `member` (
-    `id` bigint not null comment 'id',
-    `mobile` varchar(11) comment 'phone number',
-    primary key (`id`),
-    unique key `mobile_unique` (`mobile`)
-) engine=innodb default charset=utf8mb4 comment='member';
+#
+# Quartz seems to work best with the driver mm.mysql-2.0.7-bin.jar
+#
+# PLEASE consider using mysql with innodb tables to avoid locking issues
+#
+# In your Quartz properties file, you'll need to set
+# org.quartz.jobStore.driverDelegateClass = org.quartz.impl.jdbcjobstore.StdJDBCDelegate
+#
+DROP TABLE IF EXISTS QRTZ_FIRED_TRIGGERS;
+DROP TABLE IF EXISTS QRTZ_PAUSED_TRIGGER_GRPS;
+DROP TABLE IF EXISTS QRTZ_SCHEDULER_STATE;
+DROP TABLE IF EXISTS QRTZ_LOCKS;
+DROP TABLE IF EXISTS QRTZ_SIMPLE_TRIGGERS;
+DROP TABLE IF EXISTS QRTZ_SIMPROP_TRIGGERS;
+DROP TABLE IF EXISTS QRTZ_CRON_TRIGGERS;
+DROP TABLE IF EXISTS QRTZ_BLOB_TRIGGERS;
+DROP TABLE IF EXISTS QRTZ_TRIGGERS;
+DROP TABLE IF EXISTS QRTZ_JOB_DETAILS;
+DROP TABLE IF EXISTS QRTZ_CALENDARS;
+
+CREATE TABLE QRTZ_JOB_DETAILS
+(
+    SCHED_NAME VARCHAR(120) NOT NULL  comment 'Scheduler Name',
+    JOB_NAME  VARCHAR(200) NOT NULL  comment 'Job Name',
+    JOB_GROUP VARCHAR(200) NOT NULL  comment 'Job Group',
+    DESCRIPTION VARCHAR(250) NULL  comment 'Description',
+    JOB_CLASS_NAME   VARCHAR(250) NOT NULL  comment 'Job Class Name',
+    IS_DURABLE VARCHAR(1) NOT NULL  comment 'Is Durable',
+    IS_NONCONCURRENT VARCHAR(1) NOT NULL  comment 'Is Non-concurrent',
+    IS_UPDATE_DATA VARCHAR(1) NOT NULL  comment 'Is Update Data',
+    REQUESTS_RECOVERY VARCHAR(1) NOT NULL  comment 'Requests Recovery',
+    JOB_DATA BLOB NULL  comment 'Job Data',
+    PRIMARY KEY (SCHED_NAME,JOB_NAME,JOB_GROUP)
+);
+
+CREATE TABLE QRTZ_TRIGGERS
+(
+    SCHED_NAME VARCHAR(120) NOT NULL  comment 'Scheduler Name',
+    TRIGGER_NAME VARCHAR(200) NOT NULL comment 'Trigger Name',
+    TRIGGER_GROUP VARCHAR(200) NOT NULL  comment 'Trigger Group',
+    JOB_NAME  VARCHAR(200) NOT NULL  comment 'Job Name',
+    JOB_GROUP VARCHAR(200) NOT NULL  comment 'Job Group',
+    DESCRIPTION VARCHAR(250) NULL  comment 'Description',
+    NEXT_FIRE_TIME BIGINT(13) NULL  comment 'Next Fire Time',
+    PREV_FIRE_TIME BIGINT(13) NULL  comment 'Previous Fire Time',
+    PRIORITY INTEGER NULL  comment 'Priority',
+    TRIGGER_STATE VARCHAR(16) NOT NULL  comment 'Trigger State',
+    TRIGGER_TYPE VARCHAR(8) NOT NULL  comment 'Trigger Type',
+    START_TIME BIGINT(13) NOT NULL  comment 'Start Time',
+    END_TIME BIGINT(13) NULL  comment 'End Time',
+    CALENDAR_NAME VARCHAR(200) NULL  comment 'Calendar Name',
+    MISFIRE_INSTR SMALLINT(2) NULL  comment 'Misfire Instruction',
+    JOB_DATA BLOB NULL  comment 'Job Data',
+    PRIMARY KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP),
+    FOREIGN KEY (SCHED_NAME,JOB_NAME,JOB_GROUP)
+        REFERENCES QRTZ_JOB_DETAILS(SCHED_NAME,JOB_NAME,JOB_GROUP)
+);
+
+CREATE TABLE QRTZ_SIMPLE_TRIGGERS
+(
+    SCHED_NAME VARCHAR(120) NOT NULL  comment 'Scheduler Name',
+    TRIGGER_NAME VARCHAR(200) NOT NULL  comment 'Trigger Name',
+    TRIGGER_GROUP VARCHAR(200) NOT NULL  comment 'Trigger Group',
+    REPEAT_COUNT BIGINT(7) NOT NULL  comment 'Repeat Count',
+    REPEAT_INTERVAL BIGINT(12) NOT NULL  comment 'Repeat Interval',
+    TIMES_TRIGGERED BIGINT(10) NOT NULL  comment 'Times Triggered',
+    PRIMARY KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP),
+    FOREIGN KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP)
+        REFERENCES QRTZ_TRIGGERS(SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP)
+);
+
+CREATE TABLE QRTZ_CRON_TRIGGERS
+(
+    SCHED_NAME VARCHAR(120) NOT NULL  comment 'Scheduler Name',
+    TRIGGER_NAME VARCHAR(200) NOT NULL  comment 'Trigger Name',
+    TRIGGER_GROUP VARCHAR(200) NOT NULL  comment 'Trigger Group',
+    CRON_EXPRESSION VARCHAR(200) NOT NULL  comment 'Cron Expression',
+    TIME_ZONE_ID VARCHAR(80)  comment 'Time Zone ID',
+    PRIMARY KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP),
+    FOREIGN KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP)
+        REFERENCES QRTZ_TRIGGERS(SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP)
+);
+
+CREATE TABLE QRTZ_SIMPROP_TRIGGERS
+(
+    SCHED_NAME VARCHAR(120) NOT NULL  comment 'Scheduler Name',
+    TRIGGER_NAME VARCHAR(200) NOT NULL  comment 'Trigger Name',
+    TRIGGER_GROUP VARCHAR(200) NOT NULL  comment 'Trigger Group',
+    STR_PROP_1 VARCHAR(512) NULL  comment 'String Property 1',
+    STR_PROP_2 VARCHAR(512) NULL  comment 'String Property 2',
+    STR_PROP_3 VARCHAR(512) NULL  comment 'String Property 3',
+    INT_PROP_1 INT NULL  comment 'Integer Property 1',
+    INT_PROP_2 INT NULL  comment 'Integer Property 2',
+    LONG_PROP_1 BIGINT NULL  comment 'Long Property 1',
+    LONG_PROP_2 BIGINT NULL  comment 'Long Property 2',
+    DEC_PROP_1 NUMERIC(13,4) NULL  comment 'Decimal Property 1',
+    DEC_PROP_2 NUMERIC(13,4) NULL  comment 'Decimal Property 2',
+    BOOL_PROP_1 VARCHAR(1) NULL  comment 'Boolean Property 1',
+    BOOL_PROP_2 VARCHAR(1) NULL  comment 'Boolean Property 2',
+    PRIMARY KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP),
+    FOREIGN KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP)
+        REFERENCES QRTZ_TRIGGERS(SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP)
+);
+
+CREATE TABLE QRTZ_BLOB_TRIGGERS
+(
+    SCHED_NAME VARCHAR(120) NOT NULL  comment 'Scheduler Name',
+    TRIGGER_NAME VARCHAR(200) NOT NULL  comment 'Trigger Name',
+    TRIGGER_GROUP VARCHAR(200) NOT NULL  comment 'Trigger Group',
+    BLOB_DATA BLOB NULL  comment 'BLOB Data',
+    PRIMARY KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP),
+    FOREIGN KEY (SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP)
+        REFERENCES QRTZ_TRIGGERS(SCHED_NAME,TRIGGER_NAME,TRIGGER_GROUP)
+);
+
+CREATE TABLE QRTZ_CALENDARS
+(
+    SCHED_NAME VARCHAR(120) NOT NULL  comment 'Scheduler Name',
+    CALENDAR_NAME  VARCHAR(200) NOT NULL comment 'Calendar Name',
+    CALENDAR BLOB NOT NULL  comment 'Calendar Data',
+    PRIMARY KEY (SCHED_NAME,CALENDAR_NAME)
+);
+
+CREATE TABLE QRTZ_PAUSED_TRIGGER_GRPS
+(
+    SCHED_NAME VARCHAR(120) NOT NULL  comment 'Scheduler Name',
+    TRIGGER_GROUP  VARCHAR(200) NOT NULL  comment 'Trigger Group',
+    PRIMARY KEY (SCHED_NAME,TRIGGER_GROUP)
+);
+
+CREATE TABLE QRTZ_FIRED_TRIGGERS
+(
+    SCHED_NAME VARCHAR(120) NOT NULL  comment 'Scheduler Name',
+    ENTRY_ID VARCHAR(95) NOT NULL  comment 'Entry ID',
+    TRIGGER_NAME VARCHAR(200) NOT NULL  comment 'Trigger Name',
+    TRIGGER_GROUP VARCHAR(200) NOT NULL  comment 'Trigger Group',
+    INSTANCE_NAME VARCHAR(200) NOT NULL  comment 'Instance Name',
+    FIRED_TIME BIGINT(13) NOT NULL  comment 'Fired Time',
+    SCHED_TIME BIGINT(13) NOT NULL  comment 'Scheduled Time',
+    PRIORITY INTEGER NOT NULL  comment 'Priority',
+    STATE VARCHAR(16) NOT NULL  comment 'State',
+    JOB_NAME VARCHAR(200) NULL  comment 'Job Name',
+    JOB_GROUP VARCHAR(200) NULL  comment 'Job Group',
+    IS_NONCONCURRENT VARCHAR(1) NULL  comment 'Is Non-concurrent',
+    REQUESTS_RECOVERY VARCHAR(1) NULL  comment 'Requests Recovery',
+    PRIMARY KEY (SCHED_NAME,ENTRY_ID)
+);
+
+CREATE TABLE QRTZ_SCHEDULER_STATE
+(
+    SCHED_NAME VARCHAR(120) NOT NULL  comment 'Scheduler Name',
+    INSTANCE_NAME VARCHAR(200) NOT NULL  comment 'Instance Name',
+    LAST_CHECKIN_TIME BIGINT(13) NOT NULL  comment 'Last Check-in Time',
+    CHECKIN_INTERVAL BIGINT(13) NOT NULL  comment 'Check-in Interval',
+    PRIMARY KEY (SCHED_NAME,INSTANCE_NAME)
+);
+
+CREATE TABLE QRTZ_LOCKS
+(
+    SCHED_NAME VARCHAR(120) NOT NULL  comment 'Scheduler Name',
+    LOCK_NAME  VARCHAR(40) NOT NULL  comment 'Lock Name',
+    PRIMARY KEY (SCHED_NAME,LOCK_NAME)
+);
