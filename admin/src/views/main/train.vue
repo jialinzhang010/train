@@ -20,6 +20,11 @@
             <a style="color: red">Delete</a>
           </a-popconfirm>
           <a @click="onEdit(record)">Edit</a>
+          <a-popconfirm title="Generating seats will remove all existed ones, are you sure?"
+                        @confirm="genSeat(record)"
+                        ok-text="Confirm" cencel-text="Cancel">
+            <a>Generate seats</a>
+          </a-popconfirm>
         </a-space>
       </template>
       <template v-else-if="column.dataIndex === 'type'">
@@ -203,6 +208,19 @@ export default defineComponent({
       });
     };
 
+    const genSeat = (record) => {
+      loading.value = true;
+      axios.get("/business/admin/train/gen-seat/" + record.code).then((response) => {
+        loading.value = false;
+        const data = response.data;
+        if (data.success) {
+          notification.success({description: "Succeeded!"});
+        } else {
+          notification.error({description: data.message});
+        }
+      });
+    }
+
     onMounted(() => {
       handleQuery({
         page: 1,
@@ -223,7 +241,8 @@ export default defineComponent({
       onAdd,
       handleOk,
       onEdit,
-      onDelete
+      onDelete,
+      genSeat
     };
   },
 });
