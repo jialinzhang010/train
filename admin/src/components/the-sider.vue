@@ -2,6 +2,7 @@
   <a-layout-sider width="200" style="background: #fff">
     <a-menu
         v-model:selectedKeys="selectedKeys"
+        :openKeys="['batch', 'base']"
         mode="inline"
         :style="{ height: '100%', borderRight: 0 }"
     >
@@ -16,36 +17,60 @@
           <coffee-outlined /> &nbsp; About
         </router-link>
       </a-menu-item>
+      <a-sub-menu key="batch">
+        <template #title>
+          <span>
+            <UnorderedListOutlined  />
+            Manage batch
+          </span>
+        </template>
+        <a-menu-item key="/batch/job">
+          <router-link to="/batch/job">
+            <MenuUnfoldOutlined /> &nbsp; Manage jobs
+          </router-link>
+        </a-menu-item>
+      </a-sub-menu>
 
-      <a-menu-item key="/station">
-        <router-link to="/station">
-          <coffee-outlined /> &nbsp; Stations
-        </router-link>
-      </a-menu-item>
+      <a-sub-menu key="base">
+        <template #title>
+          <span>
+            <UnorderedListOutlined />
+            Train data
+          </span>
+        </template>
+        <a-menu-item key="/base/station">
+          <router-link to="/base/station">
+            <coffee-outlined /> &nbsp; Stations
+          </router-link>
+        </a-menu-item>
 
-      <a-menu-item key="/train">
-        <router-link to="/train">
-          <coffee-outlined /> &nbsp; Trains
-        </router-link>
-      </a-menu-item>
+        <a-menu-item key="/base/train">
+          <router-link to="/base/train">
+            <coffee-outlined /> &nbsp; Trains
+          </router-link>
+        </a-menu-item>
 
-      <a-menu-item key="/train-station">
-        <router-link to="/train-station">
-          <coffee-outlined /> &nbsp; Train Stations
-        </router-link>
-      </a-menu-item>
+        <a-menu-item key="/base/train-station">
+          <router-link to="/base/train-station">
+            <coffee-outlined /> &nbsp; Train Stations
+          </router-link>
+        </a-menu-item>
 
-      <a-menu-item key="/train-carriage">
-        <router-link to="/train-carriage">
-          <coffee-outlined /> &nbsp; Train Carriages
-        </router-link>
-      </a-menu-item>
+        <a-menu-item key="/base/train-carriage">
+          <router-link to="/base/train-carriage">
+            <coffee-outlined /> &nbsp; Train Carriages
+          </router-link>
+        </a-menu-item>
 
-      <a-menu-item key="/train-seat">
-        <router-link to="/train-seat">
-          <coffee-outlined /> &nbsp; Train Seats
-        </router-link>
-      </a-menu-item>
+        <a-menu-item key="/base/train-seat">
+          <router-link to="/base/train-seat">
+            <coffee-outlined /> &nbsp; Train Seats
+          </router-link>
+        </a-menu-item>
+      </a-sub-menu>
+
+
+
 
     </a-menu>
   </a-layout-sider>
