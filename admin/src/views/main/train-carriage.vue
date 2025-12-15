@@ -48,15 +48,15 @@
           </a-select-option>
         </a-select>
       </a-form-item>
-      <a-form-item label="Seat count">
-        <a-input v-model:value="trainCarriage.seatCount" />
-      </a-form-item>
+<!--      <a-form-item label="Seat count">-->
+<!--        <a-input v-model:value="trainCarriage.seatCount" />-->
+<!--      </a-form-item>-->
       <a-form-item label="Row count">
         <a-input v-model:value="trainCarriage.rowCount" />
       </a-form-item>
-      <a-form-item label="Column count">
-        <a-input v-model:value="trainCarriage.colCount" />
-      </a-form-item>
+<!--      <a-form-item label="Column count">-->
+<!--        <a-input v-model:value="trainCarriage.colCount" />-->
+<!--      </a-form-item>-->
     </a-form>
   </a-modal>
 </template>

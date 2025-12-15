@@ -2,8 +2,8 @@
   <p>
     <a-space>
       <train-select-view v-model="params.trainCode" width="200px"></train-select-view>
-      <a-button type="primary" @click="handleQuery()">Search</a-button>
-      <a-button type="primary" @click="onAdd">Add</a-button>
+      <a-button type="primary" @click="handleQuery()">Refresh</a-button>
+      
     </a-space>
   </p>
   <a-table :dataSource="trainSeats"
@@ -13,19 +13,10 @@
            :loading="loading">
     <template #bodyCell="{ column, record }">
       <template v-if="column.dataIndex === 'operation'">
-        <a-space>
-          <a-popconfirm
-              title="Deletion is irreversible. Confirm deletion?"
-              @confirm="onDelete(record)"
-              ok-text="Confirm" cancel-text="Cancel">
-            <a style="color: red">Delete</a>
-          </a-popconfirm>
-          <a @click="onEdit(record)">Edit</a>
-        </a-space>
       </template>
       <template v-else-if="column.dataIndex === 'col'">
         <span v-for="item in SEAT_COL_ARRAY" :key="item.code">
-          <span v-if="item.code === record.col">
+          <span v-if="item.code === record.col && item.type === record.seatType">
             {{item.desc}}
           </span>
         </span>
@@ -39,37 +30,6 @@
       </template>
     </template>
   </a-table>
-  <a-modal v-model:visible="visible" title="Seat" @ok="handleOk"
-           ok-text="Confirm" cancel-text="Cancel">
-    <a-form :model="trainSeat" :label-col="{span: 7}" :wrapper-col="{ span: 20 }">
-      <a-form-item label="Train code">
-        <train-select-view v-model="trainSeat.trainCode"></train-select-view>
-      </a-form-item>
-      <a-form-item label="Carriage index">
-        <a-input v-model:value="trainSeat.carriageIndex" />
-      </a-form-item>
-      <a-form-item label="Row number ">
-        <a-input v-model:value="trainSeat.row" />
-      </a-form-item>
-      <a-form-item label="Column number ">
-        <a-select v-model:value="trainSeat.col">
-          <a-select-option v-for="item in SEAT_COL_ARRAY" :key="item.code" :value="item.code">
-            {{item.desc}}
-          </a-select-option>
-        </a-select>
-      </a-form-item>
-      <a-form-item label="Seat type ">
-        <a-select v-model:value="trainSeat.seatType">
-          <a-select-option v-for="item in SEAT_TYPE_ARRAY" :key="item.code" :value="item.code">
-            {{item.desc}}
-          </a-select-option>
-        </a-select>
-      </a-form-item>
-      <a-form-item label="Carriage seat index">
-        <a-input v-model:value="trainSeat.carriageSeatIndex" />
-      </a-form-item>
-    </a-form>
-  </a-modal>
 </template>
 
 <script>
@@ -77,7 +37,6 @@ import { defineComponent, ref, onMounted } from 'vue';
 import {notification} from "ant-design-vue";
 import axios from "axios";
 import TrainSelectView from "@/components/train-select.vue";
-import trainStation from "@/views/main/train-station.vue";
 
 export default defineComponent({
   name: "train-seat-view",
@@ -143,52 +102,8 @@ export default defineComponent({
       dataIndex: 'carriageSeatIndex',
       key: 'carriageSeatIndex',
     },
-    {
-      title: 'Operation',
-      dataIndex: 'operation'
-    }
     ];
 
-    const onAdd = () => {
-      trainSeat.value = {};
-      visible.value = true;
-    };
-
-    const onEdit = (record) => {
-      trainSeat.value = window.Tool.copy(record);
-      visible.value = true;
-    };
-
-    const onDelete = (record) => {
-      axios.delete("/business/admin/train-seat/delete/" + record.id).then((response) => {
-        const data = response.data;
-        if (data.success) {
-          notification.success({description: "Deleted!"});
-          handleQuery({
-            page: pagination.value.current,
-            size: pagination.value.pageSize,
-          });
-        } else {
-          notification.error({description: data.message});
-        }
-      });
-    };
-
-    const handleOk = () => {
-      axios.post("/business/admin/train-seat/save", trainSeat.value).then((response) => {
-        let data = response.data;
-        if (data.success) {
-          notification.success({description: "Saved!"});
-          visible.value = false;
-          handleQuery({
-            page: pagination.value.current,
-            size: pagination.value.pageSize
-          });
-        } else {
-          notification.error({description: data.message});
-        }
-      });
-    };
 
     const handleQuery = (param) => {
       if (!param) {
@@ -243,10 +158,6 @@ export default defineComponent({
       handleTableChange,
       handleQuery,
       loading,
-      onAdd,
-      handleOk,
-      onEdit,
-      onDelete,
       params
     };
   },
