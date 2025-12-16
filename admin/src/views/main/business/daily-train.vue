@@ -38,9 +38,9 @@
         <a-date-picker v-model:value="dailyTrain.date" valueFormat="YYYY-MM-DD" placeholder="Please select a time" />
       </a-form-item>
       <a-form-item label="Train code">
-        <a-input v-model:value="dailyTrain.code" />
+        <train-select-view v-model="dailyTrain.code" @change="onChangeCode"></train-select-view>
       </a-form-item>
-      <a-form-item label="Train Type ">
+      <a-form-item label="Train Type">
         <a-select v-model:value="dailyTrain.type">
           <a-select-option v-for="item in TRAIN_TYPE_ARRAY" :key="item.code" :value="item.code">
             {{item.desc}}
@@ -67,9 +67,11 @@
 import { defineComponent, ref, onMounted } from 'vue';
 import {notification} from "ant-design-vue";
 import axios from "axios";
+import TrainSelectView from "@/components/train-select.vue";
 
 export default defineComponent({
   name: "daily-train-view",
+  components: {TrainSelectView},
   setup() {
     const TRAIN_TYPE_ARRAY = window.TRAIN_TYPE_ARRAY;
     const visible = ref(false);
@@ -209,6 +211,14 @@ export default defineComponent({
       });
     };
 
+    const onChangeCode = (train) => {
+      console.log("Train code dropdown selected: ", train);
+      let t = Tool.copy(train);
+      delete t.id;
+      // Use assign to merge
+      dailyTrain.value = Object.assign(dailyTrain.value, t);
+    }
+
     onMounted(() => {
       handleQuery({
         page: 1,
@@ -229,7 +239,8 @@ export default defineComponent({
       onAdd,
       handleOk,
       onEdit,
-      onDelete
+      onDelete,
+      onChangeCode
     };
   },
 });
