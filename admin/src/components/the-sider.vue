@@ -29,6 +29,11 @@
             <coffee-outlined /> &nbsp; Daily train
           </router-link>
         </a-menu-item>
+        <a-menu-item key="/business/daily-train-station">
+          <router-link to="/business/daily-train-station">
+            <coffee-outlined /> &nbsp; Daily train station
+          </router-link>
+        </a-menu-item>
       </a-sub-menu>
 
 
