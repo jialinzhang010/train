@@ -2,7 +2,7 @@
   <p>
     <a-space>
       <a-button type="primary" @click="handleQuery()">Refresh</a-button>
-      <a-button type="primary" @click="onAdd">Add</a-button>
+      
     </a-space>
   </p>
   <a-table :dataSource="dailyTrainSeats"
@@ -12,15 +12,6 @@
            :loading="loading">
     <template #bodyCell="{ column, record }">
       <template v-if="column.dataIndex === 'operation'">
-        <a-space>
-          <a-popconfirm
-              title="Deletion is irreversible. Confirm deletion?"
-              @confirm="onDelete(record)"
-              ok-text="Confirm" cancel-text="Cancel">
-            <a style="color: red">Delete</a>
-          </a-popconfirm>
-          <a @click="onEdit(record)">Edit</a>
-        </a-space>
       </template>
       <template v-else-if="column.dataIndex === 'col'">
         <span v-for="item in SEAT_COL_ARRAY" :key="item.code">
@@ -38,43 +29,6 @@
       </template>
     </template>
   </a-table>
-  <a-modal v-model:visible="visible" title="Daily seat" @ok="handleOk"
-           ok-text="Confirm" cancel-text="Cancel">
-    <a-form :model="dailyTrainSeat" :label-col="{span: 7}" :wrapper-col="{ span: 20 }">
-      <a-form-item label="date">
-        <a-date-picker v-model:value="dailyTrainSeat.date" valueFormat="YYYY-MM-DD" placeholder="Please select a time" />
-      </a-form-item>
-      <a-form-item label="Train code">
-        <a-input v-model:value="dailyTrainSeat.trainCode" />
-      </a-form-item>
-      <a-form-item label="Carriage index">
-        <a-input v-model:value="dailyTrainSeat.carriageIndex" />
-      </a-form-item>
-      <a-form-item label="Row number ">
-        <a-input v-model:value="dailyTrainSeat.row" />
-      </a-form-item>
-      <a-form-item label="Column number ">
-        <a-select v-model:value="dailyTrainSeat.col">
-          <a-select-option v-for="item in SEAT_COL_ARRAY" :key="item.code" :value="item.code">
-            {{item.desc}}
-          </a-select-option>
-        </a-select>
-      </a-form-item>
-      <a-form-item label="Seat type ">
-        <a-select v-model:value="dailyTrainSeat.seatType">
-          <a-select-option v-for="item in SEAT_TYPE_ARRAY" :key="item.code" :value="item.code">
-            {{item.desc}}
-          </a-select-option>
-        </a-select>
-      </a-form-item>
-      <a-form-item label="Carriage seat index">
-        <a-input v-model:value="dailyTrainSeat.carriageSeatIndex" />
-      </a-form-item>
-      <a-form-item label="Sales status ">
-        <a-input v-model:value="dailyTrainSeat.sell" />
-      </a-form-item>
-    </a-form>
-  </a-modal>
 </template>
 
 <script>
@@ -149,52 +103,8 @@ export default defineComponent({
       dataIndex: 'sell',
       key: 'sell',
     },
-    {
-      title: 'Operation',
-      dataIndex: 'operation'
-    }
     ];
 
-    const onAdd = () => {
-      dailyTrainSeat.value = {};
-      visible.value = true;
-    };
-
-    const onEdit = (record) => {
-      dailyTrainSeat.value = window.Tool.copy(record);
-      visible.value = true;
-    };
-
-    const onDelete = (record) => {
-      axios.delete("/business/admin/daily-train-seat/delete/" + record.id).then((response) => {
-        const data = response.data;
-        if (data.success) {
-          notification.success({description: "Deleted!"});
-          handleQuery({
-            page: pagination.value.current,
-            size: pagination.value.pageSize,
-          });
-        } else {
-          notification.error({description: data.message});
-        }
-      });
-    };
-
-    const handleOk = () => {
-      axios.post("/business/admin/daily-train-seat/save", dailyTrainSeat.value).then((response) => {
-        let data = response.data;
-        if (data.success) {
-          notification.success({description: "Saved!"});
-          visible.value = false;
-          handleQuery({
-            page: pagination.value.current,
-            size: pagination.value.pageSize
-          });
-        } else {
-          notification.error({description: data.message});
-        }
-      });
-    };
 
     const handleQuery = (param) => {
       if (!param) {
@@ -248,10 +158,6 @@ export default defineComponent({
       handleTableChange,
       handleQuery,
       loading,
-      onAdd,
-      handleOk,
-      onEdit,
-      onDelete
     };
   },
 });
