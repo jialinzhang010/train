@@ -126,3 +126,19 @@ create table `daily_train_carriage` (
     unique key `train_code_index_unique` (`train_code`, `index`),
     primary key (`id`)
 ) engine=innodb default charset=utf8mb4 comment='Daily train carriage';
+
+drop table if exists `daily_train_seat`;
+create table `daily_train_seat` (
+    `id` bigint not null comment 'id',
+    `date` date not null comment 'date',
+    `train_code` varchar(20) not null comment 'Train code',
+    `carriage_index` int not null comment 'Carriage index',
+    `row` char(2) not null comment 'Row number | 01, 02',
+    `col` char(1) not null comment 'Column number | Enum[SeatColEnum]',
+    `seat_type` char(1) not null comment 'Seat type | Enum[SeatTypeEnum]',
+    `carriage_seat_index` int not null comment 'Carriage seat index',
+    `sell` varchar(50) not null comment 'Sales status | Generate a segment availability string using 0s and 1s, where 0 indicates "available for sale" and 1 indicates "not available for sale."',
+    `create_time` datetime(3) comment 'Create time',
+    `update_time` datetime(3) comment 'Update time',
+    primary key (`id`)
+) engine=innodb default charset=utf8mb4 comment='Daily seat';
