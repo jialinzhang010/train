@@ -35,6 +35,7 @@ public class TrainCarriageService {
     public void save(TrainCarriageSaveReq req) {
         DateTime now = DateTime.now();
 
+        // Calculate cols and seat count
         List<SeatColEnum> seatColEnums = SeatColEnum.getColsByType(req.getSeatType());
         req.setColCount(seatColEnums.size());
         req.setSeatCount(req.getColCount() * req.getRowCount());

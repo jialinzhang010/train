@@ -1,10 +1,10 @@
 package com.jialin.train.business.req;
 
-import java.util.Date;
 import com.fasterxml.jackson.annotation.JsonFormat;
-
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+
+import java.util.Date;
 
 public class DailyTrainCarriageSaveReq {
 
@@ -38,10 +38,6 @@ public class DailyTrainCarriageSaveReq {
     @NotBlank(message = "[Seat type ] cannot be empty")
     private String seatType;
 
-    /**
-     * Seat count
-     */
-    @NotNull(message = "[Seat count] cannot be empty")
     private Integer seatCount;
 
     /**
@@ -50,10 +46,6 @@ public class DailyTrainCarriageSaveReq {
     @NotNull(message = "[Row count] cannot be empty")
     private Integer rowCount;
 
-    /**
-     * Column count
-     */
-    @NotNull(message = "[Column count] cannot be empty")
     private Integer colCount;
 
     /**
