@@ -1,13 +1,11 @@
 <template>
   <p>
     <a-space>
-      <a-date-picker v-model:value="params.date" valueFormat="YYYY-MM-DD" placeholder="Please select a time" />
-      <train-select-view v-model="params.trainCode" width="200px"></train-select-view>
-      <a-button type="primary" @click="handleQuery()">Search</a-button>
+      <a-button type="primary" @click="handleQuery()">Refresh</a-button>
       <a-button type="primary" @click="onAdd">Add</a-button>
     </a-space>
   </p>
-  <a-table :dataSource="dailyTrainStations"
+  <a-table :dataSource="dailyTrainCarriages"
            :columns="columns"
            :pagination="pagination"
            @change="handleTableChange"
@@ -24,75 +22,76 @@
           <a @click="onEdit(record)">Edit</a>
         </a-space>
       </template>
+      <template v-else-if="column.dataIndex === 'seatType'">
+        <span v-for="item in SEAT_TYPE_ARRAY" :key="item.code">
+          <span v-if="item.code === record.seatType">
+            {{item.desc}}
+          </span>
+        </span>
+      </template>
     </template>
   </a-table>
-  <a-modal v-model:visible="visible" title="Daily train station" @ok="handleOk"
+  <a-modal v-model:visible="visible" title="Daily train carriage" @ok="handleOk"
            ok-text="Confirm" cancel-text="Cancel">
-    <a-form :model="dailyTrainStation" :label-col="{span: 7}" :wrapper-col="{ span: 20 }">
+    <a-form :model="dailyTrainCarriage" :label-col="{span: 4}" :wrapper-col="{ span: 20 }">
       <a-form-item label="date">
-        <a-date-picker v-model:value="dailyTrainStation.date" valueFormat="YYYY-MM-DD" placeholder="Please select a time" />
+        <a-date-picker v-model:value="dailyTrainCarriage.date" valueFormat="YYYY-MM-DD" placeholder="Please select a time" />
       </a-form-item>
       <a-form-item label="Train code">
-        <train-select-view v-model="dailyTrainStation.trainCode"></train-select-view>
+        <a-input v-model:value="dailyTrainCarriage.trainCode" />
       </a-form-item>
-      <a-form-item label="Station order">
-        <a-input v-model:value="dailyTrainStation.index" />
+      <a-form-item label="Carriage number">
+        <a-input v-model:value="dailyTrainCarriage.index" />
       </a-form-item>
-      <a-form-item label="Station name">
-        <a-input v-model:value="dailyTrainStation.name" />
+      <a-form-item label="Seat type ">
+        <a-select v-model:value="dailyTrainCarriage.seatType">
+          <a-select-option v-for="item in SEAT_TYPE_ARRAY" :key="item.code" :value="item.code">
+            {{item.desc}}
+          </a-select-option>
+        </a-select>
       </a-form-item>
-      <a-form-item label="Arrival time">
-        <a-time-picker v-model:value="dailyTrainStation.inTime" valueFormat="HH:mm:ss" placeholder="Please select a time" />
+      <a-form-item label="Seat count">
+        <a-input v-model:value="dailyTrainCarriage.seatCount" />
       </a-form-item>
-      <a-form-item label="Departure time">
-        <a-time-picker v-model:value="dailyTrainStation.outTime" valueFormat="HH:mm:ss" placeholder="Please select a time" />
+      <a-form-item label="Row count">
+        <a-input v-model:value="dailyTrainCarriage.rowCount" />
       </a-form-item>
-      <a-form-item label="Dwell time">
-        <a-time-picker v-model:value="dailyTrainStation.stopTime" valueFormat="HH:mm:ss" placeholder="Please select a time" disabled/>
-      </a-form-item>
-      <a-form-item label="Distance">
-        <a-input v-model:value="dailyTrainStation.km" />
+      <a-form-item label="Column count">
+        <a-input v-model:value="dailyTrainCarriage.colCount" />
       </a-form-item>
     </a-form>
   </a-modal>
 </template>
 
 <script>
-import {defineComponent, ref, onMounted, watch} from 'vue';
+import { defineComponent, ref, onMounted } from 'vue';
 import {notification} from "ant-design-vue";
 import axios from "axios";
-import TrainSelectView from "@/components/train-select.vue";
-import dayjs from "dayjs";
 
 export default defineComponent({
-  name: "daily-train-station-view",
-  components: {TrainSelectView},
+  name: "daily-train-carriage-view",
   setup() {
+    const SEAT_TYPE_ARRAY = window.SEAT_TYPE_ARRAY;
     const visible = ref(false);
-    let dailyTrainStation = ref({
+    let dailyTrainCarriage = ref({
       id: undefined,
       date: undefined,
       trainCode: undefined,
       index: undefined,
-      name: undefined,
-      inTime: undefined,
-      outTime: undefined,
-      stopTime: undefined,
-      km: undefined,
+      seatType: undefined,
+      seatCount: undefined,
+      rowCount: undefined,
+      colCount: undefined,
       createTime: undefined,
       updateTime: undefined,
     });
-    const dailyTrainStations = ref([]);
+    const dailyTrainCarriages = ref([]);
     const pagination = ref({
       total: 0,
       current: 1,
       pageSize: 10,
     });
     let loading = ref(false);
-    let params = ref({
-      trainCode: null,
-      date: null
-    });
     const columns = [
     {
       title: 'date',
@@ -105,34 +104,29 @@ export default defineComponent({
       key: 'trainCode',
     },
     {
-      title: 'Station order',
+      title: 'Carriage number',
       dataIndex: 'index',
       key: 'index',
     },
     {
-      title: 'Station name',
-      dataIndex: 'name',
-      key: 'name',
+      title: 'Seat type ',
+      dataIndex: 'seatType',
+      key: 'seatType',
     },
     {
-      title: 'Arrival time',
-      dataIndex: 'inTime',
-      key: 'inTime',
+      title: 'Seat count',
+      dataIndex: 'seatCount',
+      key: 'seatCount',
     },
     {
-      title: 'Departure time',
-      dataIndex: 'outTime',
-      key: 'outTime',
+      title: 'Row count',
+      dataIndex: 'rowCount',
+      key: 'rowCount',
     },
     {
-      title: 'Dwell time',
-      dataIndex: 'stopTime',
-      key: 'stopTime',
-    },
-    {
-      title: 'Distance',
-      dataIndex: 'km',
-      key: 'km',
+      title: 'Column count',
+      dataIndex: 'colCount',
+      key: 'colCount',
     },
     {
       title: 'Operation',
@@ -140,28 +134,18 @@ export default defineComponent({
     }
     ];
 
-    watch(() => dailyTrainStation.value.inTime, () => {
-      let diff = dayjs(dailyTrainStation.value.outTime, 'HH:mm:ss').diff(dayjs(dailyTrainStation.value.inTime, 'HH:mm:ss'), 'seconds');
-      dailyTrainStation.value.stopTime = dayjs('00:00:00', 'HH:mm:ss').second(diff).format('HH:mm:ss');
-    }, {immediate: true});
-
-    watch(() => dailyTrainStation.value.outTime, () => {
-      let diff = dayjs(dailyTrainStation.value.outTime, 'HH:mm:ss').diff(dayjs(dailyTrainStation.value.inTime, 'HH:mm:ss'), 'seconds');
-      dailyTrainStation.value.stopTime = dayjs('00:00:00', 'HH:mm:ss').second(diff).format('HH:mm:ss');
-    }, {immediate: true});
-
     const onAdd = () => {
-      dailyTrainStation.value = {};
+      dailyTrainCarriage.value = {};
       visible.value = true;
     };
 
     const onEdit = (record) => {
-      dailyTrainStation.value = window.Tool.copy(record);
+      dailyTrainCarriage.value = window.Tool.copy(record);
       visible.value = true;
     };
 
     const onDelete = (record) => {
-      axios.delete("/business/admin/daily-train-station/delete/" + record.id).then((response) => {
+      axios.delete("/business/admin/daily-train-carriage/delete/" + record.id).then((response) => {
         const data = response.data;
         if (data.success) {
           notification.success({description: "Deleted!"});
@@ -176,7 +160,7 @@ export default defineComponent({
     };
 
     const handleOk = () => {
-      axios.post("/business/admin/daily-train-station/save", dailyTrainStation.value).then((response) => {
+      axios.post("/business/admin/daily-train-carriage/save", dailyTrainCarriage.value).then((response) => {
         let data = response.data;
         if (data.success) {
           notification.success({description: "Saved!"});
@@ -199,18 +183,16 @@ export default defineComponent({
         };
       }
       loading.value = true;
-      axios.get("/business/admin/daily-train-station/query-list", {
+      axios.get("/business/admin/daily-train-carriage/query-list", {
         params: {
           page: param.page,
-          size: param.size,
-          trainCode: params.value.trainCode,
-          date: params.value.date
+          size: param.size
         }
       }).then((response) => {
         loading.value = false;
         let data = response.data;
         if (data.success) {
-          dailyTrainStations.value = data.content.list;
+          dailyTrainCarriages.value = data.content.list;
           pagination.value.current = param.page;
           pagination.value.total = data.content.total;
         } else {
@@ -235,9 +217,10 @@ export default defineComponent({
     });
 
     return {
-      dailyTrainStation,
+      SEAT_TYPE_ARRAY,
+      dailyTrainCarriage,
       visible,
-      dailyTrainStations,
+      dailyTrainCarriages,
       pagination,
       columns,
       handleTableChange,
@@ -246,8 +229,7 @@ export default defineComponent({
       onAdd,
       handleOk,
       onEdit,
-      onDelete,
-      params
+      onDelete
     };
   },
 });

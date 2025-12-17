@@ -1,5 +1,5 @@
 <template>
-  <a-layout-sider width="200" style="background: #fff">
+  <a-layout-sider width="230" style="background: #fff">
     <a-menu
         v-model:selectedKeys="selectedKeys"
         :openKeys="['batch', 'base', 'business']"
@@ -32,6 +32,11 @@
         <a-menu-item key="/business/daily-train-station">
           <router-link to="/business/daily-train-station">
             <coffee-outlined /> &nbsp; Daily train station
+          </router-link>
+        </a-menu-item>
+        <a-menu-item key="/business/daily-train-carriage">
+          <router-link to="/business/daily-train-carriage">
+            <coffee-outlined /> &nbsp; Daily train carriage
           </router-link>
         </a-menu-item>
       </a-sub-menu>
