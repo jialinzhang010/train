@@ -44,8 +44,11 @@ public class DailyTrainSeatService {
 
     public PageResp<DailyTrainSeatQueryResp> queryList(DailyTrainSeatQueryReq req) {
         DailyTrainSeatExample dailyTrainSeatExample = new DailyTrainSeatExample();
-        dailyTrainSeatExample.setOrderByClause("id desc");
+        dailyTrainSeatExample.setOrderByClause("train_code asc, carriage_index asc, carriage_seat_index asc");
         DailyTrainSeatExample.Criteria criteria = dailyTrainSeatExample.createCriteria();
+        if (ObjectUtil.isNotEmpty(req.getTrainCode())) {
+            criteria.andTrainCodeEqualTo(req.getTrainCode());
+        }
 
         LOG.info("Requested pages: {}", req.getPage());
         LOG.info("Requested page size: {}", req.getSize());
