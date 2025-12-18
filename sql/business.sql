@@ -123,7 +123,7 @@ create table `daily_train_carriage` (
     `col_count` int not null comment 'Column count',
     `create_time` datetime(3) comment 'Create time',
     `update_time` datetime(3) comment 'Update time',
-    unique key `train_code_index_unique` (`train_code`, `index`),
+    unique key `date_train_code_index_unique` (`date`, `train_code`, `index`),
     primary key (`id`)
 ) engine=innodb default charset=utf8mb4 comment='Daily train carriage';
 

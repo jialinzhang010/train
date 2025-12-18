@@ -5,6 +5,7 @@
       <train-select-view v-model="params.code" width="200px"></train-select-view>
       <a-button type="primary" @click="handleQuery()">Search</a-button>
       <a-button type="primary" @click="onAdd">Add</a-button>
+      <a-button type="danger" @click="onClickGenDaily">Manually generate daily train data</a-button>
     </a-space>
   </p>
   <a-table :dataSource="dailyTrains"
@@ -63,6 +64,14 @@
       </a-form-item>
     </a-form>
   </a-modal>
+  <a-modal v-model:visible="genDailyVisible" title="Generate train data" @ok="handleGenDailyOk"
+           :confirm-loading="genDailyLoading" ok-text="Confirm" cancel-text="Cancel">
+    <a-form :model="genDaily" :label-col="{span: 4}" :wrapper-col="{span: 20}">
+      <a-form-item label="Date">
+        <a-date-picker v-model:value="genDaily.date" placeholder="Select date" />
+      </a-form-item>
+    </a-form>
+  </a-modal>
 </template>
 
 <script>
@@ -70,6 +79,7 @@ import { defineComponent, ref, onMounted } from 'vue';
 import {notification} from "ant-design-vue";
 import axios from "axios";
 import TrainSelectView from "@/components/train-select.vue";
+import dayjs from "dayjs";
 
 export default defineComponent({
   name: "daily-train-view",
@@ -100,6 +110,12 @@ export default defineComponent({
       code: null,
       date: null
     });
+    const genDaily = ref({
+      date: null
+    });
+    const genDailyVisible = ref(false);
+    let genDailyLoading = ref(false);
+
     const columns = [
     {
       title: 'Date',
@@ -227,6 +243,29 @@ export default defineComponent({
       dailyTrain.value = Object.assign(dailyTrain.value, t);
     }
 
+    const onClickGenDaily = () => {
+      genDailyVisible.value = true;
+    }
+
+    const handleGenDailyOk = () => {
+      let date = dayjs(genDaily.value.date).format("YYYY-MM-DD");
+      genDailyLoading.value = true;
+      axios.get("/business/admin/daily-train/gen-daily/" + date).then((response) => {
+        genDailyLoading.value = false;
+        let data = response.data;
+        if (data.success) {
+          notification.success({description: "Generated!"});
+          genDailyVisible.value = false;
+          handleQuery({
+            page: pagination.value.current,
+            size: pagination.value.pageSize
+          });
+        } else {
+          notification.error({description: data.message});
+        }
+      });
+    }
+
     onMounted(() => {
       handleQuery({
         page: 1,
@@ -250,6 +289,11 @@ export default defineComponent({
       onDelete,
       onChangeCode,
       params,
+      genDaily,
+      onClickGenDaily,
+      genDailyVisible,
+      handleGenDailyOk,
+      genDailyLoading
     };
   },
 });
