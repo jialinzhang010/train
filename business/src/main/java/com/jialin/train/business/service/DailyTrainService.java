@@ -1,23 +1,26 @@
 package com.jialin.train.business.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.jialin.train.common.resp.PageResp;
-import com.jialin.train.common.util.SnowUtil;
 import com.jialin.train.business.domain.DailyTrain;
 import com.jialin.train.business.domain.DailyTrainExample;
+import com.jialin.train.business.domain.Train;
 import com.jialin.train.business.mapper.DailyTrainMapper;
 import com.jialin.train.business.req.DailyTrainQueryReq;
 import com.jialin.train.business.req.DailyTrainSaveReq;
 import com.jialin.train.business.resp.DailyTrainQueryResp;
+import com.jialin.train.common.resp.PageResp;
+import com.jialin.train.common.util.SnowUtil;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -27,6 +30,9 @@ public class DailyTrainService {
 
     @Resource
     private DailyTrainMapper dailyTrainMapper;
+
+    @Resource
+    private TrainService trainService;
 
     public void save(DailyTrainSaveReq req) {
         DateTime now = DateTime.now();
@@ -72,5 +78,37 @@ public class DailyTrainService {
 
     public void delete(Long id) {
         dailyTrainMapper.deleteByPrimaryKey(id);
+    }
+
+    /*
+    Generate all train data, including code, station, carriage, seat
+     */
+    public void genDaily(Date date) {
+        List<Train> trainList = trainService.selectAll();
+        if (CollUtil.isEmpty(trainList)) {
+            LOG.info("No trains found, task ended");
+            return;
+        }
+        for (Train train : trainList) {
+            genDailyTrain(date, train);
+        }
+    }
+
+    public void genDailyTrain(Date date, Train train) {
+        DailyTrainExample dailyTrainExample = new DailyTrainExample();
+        dailyTrainExample.createCriteria()
+                .andDateEqualTo(date)
+                .andCodeEqualTo(train.getCode());
+        // Only delete trains on that date
+        dailyTrainMapper.deleteByExample(dailyTrainExample);
+
+        DateTime now = DateTime.now();
+        DailyTrain dailyTrain = BeanUtil.copyProperties(train, DailyTrain.class);
+        dailyTrain.setId(SnowUtil.getSnowflakeNextId());
+        dailyTrain.setCreateTime(now);
+        dailyTrain.setUpdateTime(now);
+        dailyTrain.setDate(date);
+        dailyTrainMapper.insert(dailyTrain);
+
     }
 }
