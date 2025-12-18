@@ -37,6 +37,9 @@ public class DailyTrainService {
     @Resource
     private DailyTrainStationService dailyTrainStationService;
 
+    @Resource
+    private DailyTrainCarriageService dailyTrainCarriageService;
+
     public void save(DailyTrainSaveReq req) {
         DateTime now = DateTime.now();
         DailyTrain dailyTrain = BeanUtil.copyProperties(req, DailyTrain.class);
@@ -115,5 +118,6 @@ public class DailyTrainService {
         dailyTrainMapper.insert(dailyTrain);
 
         dailyTrainStationService.genDaily(date, train.getCode());
+        dailyTrainCarriageService.genDaily(date, train.getCode());
     }
 }
