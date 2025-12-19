@@ -14,13 +14,13 @@ public class DailyTrainTicket {
 
     private Date startTime;
 
-    private Byte startIndex;
+    private Integer startIndex;
 
     private String end;
 
     private Date endTime;
 
-    private Byte endIndex;
+    private Integer endIndex;
 
     private Integer ydz;
 
@@ -82,11 +82,11 @@ public class DailyTrainTicket {
         this.startTime = startTime;
     }
 
-    public Byte getStartIndex() {
+    public Integer getStartIndex() {
         return startIndex;
     }
 
-    public void setStartIndex(Byte startIndex) {
+    public void setStartIndex(Integer startIndex) {
         this.startIndex = startIndex;
     }
 
@@ -106,11 +106,11 @@ public class DailyTrainTicket {
         this.endTime = endTime;
     }
 
-    public Byte getEndIndex() {
+    public Integer getEndIndex() {
         return endIndex;
     }
 
-    public void setEndIndex(Byte endIndex) {
+    public void setEndIndex(Integer endIndex) {
         this.endIndex = endIndex;
     }
 

@@ -68,7 +68,7 @@ public class ServerGenerator {
         param.put("readOnly", readOnly);
         System.out.println("param: " + param);
 
-        gen(Domain, param, "service", "service");
+//        gen(Domain, param, "service", "service");
         gen(domain, param, "controller/admin", "adminController");
         gen(Domain, param, "req", "saveReq");
         gen(Domain, param, "req", "queryReq");

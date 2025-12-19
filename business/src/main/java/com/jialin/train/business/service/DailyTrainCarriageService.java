@@ -7,18 +7,21 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.jialin.train.business.domain.*;
+import com.jialin.train.business.domain.DailyTrainCarriage;
+import com.jialin.train.business.domain.DailyTrainCarriageExample;
+import com.jialin.train.business.domain.TrainCarriage;
 import com.jialin.train.business.enums.SeatColEnum;
-import com.jialin.train.common.resp.PageResp;
-import com.jialin.train.common.util.SnowUtil;
 import com.jialin.train.business.mapper.DailyTrainCarriageMapper;
 import com.jialin.train.business.req.DailyTrainCarriageQueryReq;
 import com.jialin.train.business.req.DailyTrainCarriageSaveReq;
 import com.jialin.train.business.resp.DailyTrainCarriageQueryResp;
+import com.jialin.train.common.resp.PageResp;
+import com.jialin.train.common.util.SnowUtil;
 import jakarta.annotation.Resource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -86,6 +89,7 @@ public class DailyTrainCarriageService {
         dailyTrainCarriageMapper.deleteByPrimaryKey(id);
     }
 
+    @Transactional
     public void genDaily(Date date, String trainCode) {
         LOG.info("Generate daily train carriage for train code: {} on {}", trainCode, DateUtil.formatDate(date));
 
