@@ -1,7 +1,6 @@
 <template>
   <p>
     <a-space>
-      <train-select-view v-model="params.trainCode" width="200px"></train-select-view>
       <a-date-picker v-model:value="params.date" valueFormat="YYYY-MM-DD" placeholder="Select date"></a-date-picker>
       <station-select-view v-model="params.start" width="200px"></station-select-view>
       <station-select-view v-model="params.end" width="200px"></station-select-view>
@@ -77,13 +76,12 @@
 import { defineComponent, ref, onMounted } from 'vue';
 import {notification} from "ant-design-vue";
 import axios from "axios";
-import TrainSelectView from "@/components/train-select.vue";
 import StationSelectView from "@/components/station-select.vue";
 import dayjs from "dayjs";
 
 export default defineComponent({
   name: "ticket-view",
-  components: {StationSelectView, TrainSelectView},
+  components: {StationSelectView},
   setup() {
     const visible = ref(false);
     let dailyTrainTicket = ref({
@@ -116,11 +114,7 @@ export default defineComponent({
     let loading = ref(false);
     const params = ref({});
     const columns = [
-    {
-      title: 'Date',
-      dataIndex: 'date',
-      key: 'date',
-    },
+
     {
       title: 'Train code',
       dataIndex: 'trainCode',
@@ -138,80 +132,41 @@ export default defineComponent({
         title: 'Duration',
         dataIndex: 'duration'
       },
-    // {
-    //   title: 'Departure station',
-    //   dataIndex: 'start',
-    //   key: 'start',
-    // },
-    // {
-    //   title: 'Departure time',
-    //   dataIndex: 'startTime',
-    //   key: 'startTime',
-    // },
-    // {
-    //   title: 'Departure station index ',
-    //   dataIndex: 'startIndex',
-    //   key: 'startIndex',
-    // },
-    // {
-    //   title: 'Arrival station',
-    //   dataIndex: 'end',
-    //   key: 'end',
-    // },
-    // {
-    //   title: 'Arrival time',
-    //   dataIndex: 'endTime',
-    //   key: 'endTime',
-    // },
-    // {
-    //   title: 'Arrival station index ',
-    //   dataIndex: 'endIndex',
-    //   key: 'endIndex',
-    // },
     {
       title: 'First class',
       dataIndex: 'ydz',
       key: 'ydz',
     },
-    // {
-    //   title: 'First class ticket price',
-    //   dataIndex: 'ydzPrice',
-    //   key: 'ydzPrice',
-    // },
     {
       title: 'Second class',
       dataIndex: 'edz',
       key: 'edz',
     },
-    // {
-    //   title: 'Second class ticket price',
-    //   dataIndex: 'edzPrice',
-    //   key: 'edzPrice',
-    // },
     {
       title: 'Soft sleeper',
       dataIndex: 'rw',
       key: 'rw',
     },
-    // {
-    //   title: 'Soft sleeper ticket price',
-    //   dataIndex: 'rwPrice',
-    //   key: 'rwPrice',
-    // },
     {
       title: 'Hard sleeper',
       dataIndex: 'yw',
       key: 'yw',
     },
-    // {
-    //   title: 'Hard sleeper ticket price',
-    //   dataIndex: 'ywPrice',
-    //   key: 'ywPrice',
-    // },
     ];
 
-
     const handleQuery = (param) => {
+      if (Tool.isEmpty(params.value.date)) {
+        notification.error({description: "Please enter date"});
+        return;
+      }
+      if (Tool.isEmpty(params.value.start)) {
+        notification.error({description: "Please enter departure station"});
+        return;
+      }
+      if (Tool.isEmpty(params.value.end)) {
+        notification.error({description: "Please enter arrival station"});
+        return;
+      }
       if (!param) {
         param = {
           page: 1,
@@ -256,10 +211,10 @@ export default defineComponent({
 
 
     onMounted(() => {
-      handleQuery({
-        page: 1,
-        size: pagination.value.pageSize
-      });
+      // handleQuery({
+      //   page: 1,
+      //   size: pagination.value.pageSize
+      // });
     });
 
     return {
