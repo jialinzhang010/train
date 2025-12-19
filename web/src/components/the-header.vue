@@ -27,6 +27,11 @@
           <user-outlined /> &nbsp; Passengers
         </router-link>
       </a-menu-item>
+      <a-menu-item key="/ticket">
+        <router-link to="/ticket">
+          <border-outer-outlined /> &nbsp; Remaining tickets
+        </router-link>
+      </a-menu-item>
     </a-menu>
 
   </a-layout-header>

@@ -17,7 +17,7 @@
       </a-menu-item>
       <a-menu-item key="/ticket">
         <router-link to="/ticket">
-          <border-outer-outlined /> &nbsp; Tickets
+          <border-outer-outlined /> &nbsp; Remaining tickets
         </router-link>
       </a-menu-item>
       <a-menu-item key="/my-ticket">
