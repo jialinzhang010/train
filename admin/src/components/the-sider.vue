@@ -24,6 +24,11 @@
             Manage business
           </span>
         </template>
+        <a-menu-item key="/business/daily-train-ticket">
+          <router-link to="/business/daily-train-ticket">
+            <coffee-outlined /> &nbsp; Remaining tickets
+          </router-link>
+        </a-menu-item>
         <a-menu-item key="/business/daily-train">
           <router-link to="/business/daily-train">
             <coffee-outlined /> &nbsp; Daily train
