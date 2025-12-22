@@ -1,3 +1,6 @@
+SESSION_ORDER = "SESSION_ORDER";
+SESSION_TICKET_PARAMS = "SESSION_TICKET_PARAMS";
+
 SessionStorage = {
     get: function (key) {
         let v = sessionStorage.getItem(key);
