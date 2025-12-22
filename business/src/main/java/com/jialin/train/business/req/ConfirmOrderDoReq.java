@@ -2,6 +2,7 @@ package com.jialin.train.business.req;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.Date;
@@ -12,7 +13,6 @@ public class ConfirmOrderDoReq {
     /**
      * Member id
      */
-    @NotNull(message = "[Member id] cannot be empty")
     private Long memberId;
 
     /**
@@ -49,7 +49,7 @@ public class ConfirmOrderDoReq {
     /**
      * tickets
      */
-    @NotBlank(message = "[tickets] cannot be empty")
+    @NotEmpty(message = "[tickets] cannot be empty")
     private List<ConfirmOrderTicketReq> tickets;
 
 
