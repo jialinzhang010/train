@@ -2,6 +2,7 @@ package com.jialin.train.business.service;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
@@ -10,11 +11,15 @@ import com.jialin.train.business.domain.ConfirmOrder;
 import com.jialin.train.business.domain.ConfirmOrderExample;
 import com.jialin.train.business.domain.DailyTrainTicket;
 import com.jialin.train.business.enums.ConfirmOrderStatusEnum;
+import com.jialin.train.business.enums.SeatTypeEnum;
 import com.jialin.train.business.mapper.ConfirmOrderMapper;
 import com.jialin.train.business.req.ConfirmOrderDoReq;
 import com.jialin.train.business.req.ConfirmOrderQueryReq;
+import com.jialin.train.business.req.ConfirmOrderTicketReq;
 import com.jialin.train.business.resp.ConfirmOrderQueryResp;
 import com.jialin.train.common.context.LoginMemberContext;
+import com.jialin.train.common.exception.BusinessException;
+import com.jialin.train.common.exception.BusinessExceptionEnum;
 import com.jialin.train.common.resp.PageResp;
 import com.jialin.train.common.util.SnowUtil;
 import jakarta.annotation.Resource;
@@ -97,10 +102,49 @@ public class ConfirmOrderService {
         confirmOrder.setStatus(ConfirmOrderStatusEnum.INIT.getCode());
         confirmOrder.setTickets(JSON.toJSONString(req.getTickets()));
         confirmOrderMapper.insert(confirmOrder);
-
+        LOG.info("日期: {}", date);
         DailyTrainTicket dailyTrainTicket = dailyTrainTicketService.selectByUnique(date, trainCode, start, end);
         LOG.info("dailyTrainTicket: {}", dailyTrainTicket);
 
+        reduceTickets(req, dailyTrainTicket);
 
+
+    }
+
+    private static void reduceTickets(ConfirmOrderDoReq req, DailyTrainTicket dailyTrainTicket) {
+        for (ConfirmOrderTicketReq ticketReq : req.getTickets()) {
+            String seatTypeCode = ticketReq.getSeatTypeCode();
+            SeatTypeEnum seatTypeEnum = EnumUtil.getBy(SeatTypeEnum::getCode, seatTypeCode);
+            switch (seatTypeEnum) {
+                case YDZ -> {
+                    int countLeft = dailyTrainTicket.getYdz() - 1;
+                    if (countLeft < 0) {
+                        throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_TICKET_COUNT_ERROR);
+                    }
+                    dailyTrainTicket.setYdz(countLeft);
+                }
+                case EDZ -> {
+                    int countLeft = dailyTrainTicket.getEdz() - 1;
+                    if (countLeft < 0) {
+                        throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_TICKET_COUNT_ERROR);
+                    }
+                    dailyTrainTicket.setEdz(countLeft);
+                }
+                case RW -> {
+                    int countLeft = dailyTrainTicket.getRw() - 1;
+                    if (countLeft < 0) {
+                        throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_TICKET_COUNT_ERROR);
+                    }
+                    dailyTrainTicket.setRw(countLeft);
+                }
+                case YW -> {
+                    int countLeft = dailyTrainTicket.getYw() - 1;
+                    if (countLeft < 0) {
+                        throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_TICKET_COUNT_ERROR);
+                    }
+                    dailyTrainTicket.setYw(countLeft);
+                }
+            }
+        }
     }
 }

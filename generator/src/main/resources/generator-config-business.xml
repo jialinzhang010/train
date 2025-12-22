@@ -24,7 +24,7 @@
 
         <!-- Configure the data source, which needs to be modified according to your project -->
         <jdbcConnection driverClass="com.mysql.cj.jdbc.Driver"
-                        connectionURL="jdbc:mysql://localhost:3306/train_business"
+                        connectionURL="jdbc:mysql://localhost:3306/train_business?serverTimezone=Asia/Shanghai"
                         userId="train_business"
                         password="train">
         </jdbcConnection>

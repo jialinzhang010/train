@@ -8,6 +8,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.core.env.Environment;
 
+import java.util.TimeZone;
+
 @SpringBootApplication
 @ComponentScan("com.jialin")
 @MapperScan("com.jialin.train.*.mapper")
@@ -16,6 +18,7 @@ public class BusinessApplication {
     private static final Logger LOG = LoggerFactory.getLogger(BusinessApplication.class);
 
     public static void main(String[] args) {
+        TimeZone.setDefault(TimeZone.getTimeZone("Asia/Shanghai"));
         SpringApplication app = new SpringApplication(BusinessApplication.class);
         Environment env = app.run(args).getEnvironment();
         LOG.info("Launched successfully!");

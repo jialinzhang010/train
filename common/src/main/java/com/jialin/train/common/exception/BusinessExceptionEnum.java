@@ -10,7 +10,9 @@ public enum BusinessExceptionEnum {
     BUSINESS_TRAIN_CODE_UNIQUE_ERROR("Train already exists"),
     BUSINESS_TRAIN_STATION_INDEX_UNIQUE_ERROR("Station index already exists"),
     BUSINESS_TRAIN_STATION_NAME_UNIQUE_ERROR("Station name already exists"),
-    BUSINESS_TRAIN_CARRIAGE_INDEX_UNIQUE_ERROR("Carriage number already exists");
+    BUSINESS_TRAIN_CARRIAGE_INDEX_UNIQUE_ERROR("Carriage number already exists"),
+
+    CONFIRM_ORDER_TICKET_COUNT_ERROR("Ticket is out of stock");
 
     private String desc;
 
