@@ -8,9 +8,7 @@ import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import com.jialin.train.business.domain.ConfirmOrder;
-import com.jialin.train.business.domain.ConfirmOrderExample;
-import com.jialin.train.business.domain.DailyTrainTicket;
+import com.jialin.train.business.domain.*;
 import com.jialin.train.business.enums.ConfirmOrderStatusEnum;
 import com.jialin.train.business.enums.SeatColEnum;
 import com.jialin.train.business.enums.SeatTypeEnum;
@@ -43,6 +41,12 @@ public class ConfirmOrderService {
 
     @Resource
     private DailyTrainTicketService dailyTrainTicketService;
+
+    @Resource
+    private DailyTrainCarriageService dailyTrainCarriageService;
+
+    @Resource
+    private DailyTrainSeatService dailyTrainSeatService;
 
     public void save(ConfirmOrderDoReq req) {
         DateTime now = DateTime.now();
@@ -135,7 +139,6 @@ public class ConfirmOrderService {
             for (ConfirmOrderTicketReq ticketReq : tickets) {
                 int index = referSeatList.indexOf(ticketReq.getSeat());
                 absoluteOffsetList.add(index);
-
             }
             LOG.info("AbsoluteOffsetList: {}", absoluteOffsetList);
             for (Integer index : absoluteOffsetList) {
@@ -143,11 +146,36 @@ public class ConfirmOrderService {
                 offsetList.add(offset);
             }
             LOG.info("OffsetList: {}", offsetList);
+
+            getSeat(date,
+                    trainCode,
+                    ticketReq0.getSeatTypeCode(),
+                    ticketReq0.getSeat().split("")[0],
+                    offsetList);
         } else {
             LOG.info("This order has no seat.");
+            for (ConfirmOrderTicketReq ticketReq : tickets) {
+                getSeat(date,
+                        trainCode,
+                        ticketReq0.getSeatTypeCode(),
+                        null,
+                        null);
+            }
         }
+    }
+    /*
+    column: 第一个座位对应的列
+     */
+    private void getSeat(Date date, String trainCode, String seatType, String column, List<Integer> offsetList) {
+        List<DailyTrainCarriage> carriageList = dailyTrainCarriageService.selectBySeatType(date, trainCode, seatType);
+        LOG.info("There are {} eligible carriages.", carriageList.size());
 
+        for (DailyTrainCarriage dailyTrainCarriage : carriageList) {
+            LOG.info("Start choose seat from carriage {}", dailyTrainCarriage);
+            List<DailyTrainSeat> seatList = dailyTrainSeatService.selectByCarriage(date, trainCode, dailyTrainCarriage.getIndex());
+            LOG.info("There are {} eligible seats.", seatList.size());
 
+        }
     }
 
     private static void reduceTickets(ConfirmOrderDoReq req, DailyTrainTicket dailyTrainTicket) {
