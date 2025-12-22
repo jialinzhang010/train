@@ -4,6 +4,7 @@ import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.ObjectUtil;
+import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
@@ -11,6 +12,7 @@ import com.jialin.train.business.domain.ConfirmOrder;
 import com.jialin.train.business.domain.ConfirmOrderExample;
 import com.jialin.train.business.domain.DailyTrainTicket;
 import com.jialin.train.business.enums.ConfirmOrderStatusEnum;
+import com.jialin.train.business.enums.SeatColEnum;
 import com.jialin.train.business.enums.SeatTypeEnum;
 import com.jialin.train.business.mapper.ConfirmOrderMapper;
 import com.jialin.train.business.req.ConfirmOrderDoReq;
@@ -27,6 +29,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -93,6 +96,7 @@ public class ConfirmOrderService {
         String trainCode = req.getTrainCode();
         String start = req.getStart();
         String end = req.getEnd();
+        List<ConfirmOrderTicketReq> tickets = req.getTickets();
 
         confirmOrder.setDate(date);
         confirmOrder.setTrainCode(trainCode);
@@ -100,13 +104,48 @@ public class ConfirmOrderService {
         confirmOrder.setEnd(end);
         confirmOrder.setDailyTrainTicketId(req.getDailyTrainTicketId());
         confirmOrder.setStatus(ConfirmOrderStatusEnum.INIT.getCode());
-        confirmOrder.setTickets(JSON.toJSONString(req.getTickets()));
+
+        confirmOrder.setTickets(JSON.toJSONString(tickets));
         confirmOrderMapper.insert(confirmOrder);
         LOG.info("日期: {}", date);
         DailyTrainTicket dailyTrainTicket = dailyTrainTicketService.selectByUnique(date, trainCode, start, end);
         LOG.info("dailyTrainTicket: {}", dailyTrainTicket);
 
         reduceTickets(req, dailyTrainTicket);
+
+        //判断有无选座：seat属性是否为空
+        ConfirmOrderTicketReq ticketReq0 = tickets.get(0);
+        LOG.info("ticketReq0: {}", ticketReq0);
+        // isBlank对空格也生效
+        if (StrUtil.isNotBlank(ticketReq0.getSeat())) {
+            LOG.info("This order has seat.");
+            List<SeatColEnum> colEnumList = SeatColEnum.getColsByType(ticketReq0.getSeatTypeCode());
+            LOG.info("The cols in this order: {}", colEnumList);
+            // e.g. {A1, C1, D1, F1, A2, C2, D2, F2}
+            List<String> referSeatList = new ArrayList<>();
+            for (int i = 1; i <= 2; i++) {
+                for (SeatColEnum seatColEnum : colEnumList) {
+                    referSeatList.add(seatColEnum.getCode() + i);
+                }
+            }
+            LOG.info("ReferSeatList: {}", referSeatList);
+
+            List<Integer> absoluteOffsetList = new ArrayList<>();
+            List<Integer> offsetList = new ArrayList<>();
+            for (ConfirmOrderTicketReq ticketReq : tickets) {
+                int index = referSeatList.indexOf(ticketReq.getSeat());
+                absoluteOffsetList.add(index);
+
+            }
+            LOG.info("AbsoluteOffsetList: {}", absoluteOffsetList);
+            for (Integer index : absoluteOffsetList) {
+                int offset = index - absoluteOffsetList.get(0);
+                offsetList.add(offset);
+            }
+            LOG.info("OffsetList: {}", offsetList);
+        } else {
+            LOG.info("This order has no seat.");
+        }
 
 
     }
