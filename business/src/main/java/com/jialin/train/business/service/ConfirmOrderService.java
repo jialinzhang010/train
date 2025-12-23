@@ -1,6 +1,7 @@
 package com.jialin.train.business.service;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.NumberUtil;
@@ -181,13 +182,55 @@ public class ConfirmOrderService {
             List<DailyTrainSeat> seatList = dailyTrainSeatService
                     .selectByCarriage(date, trainCode, dailyTrainCarriage.getIndex());
             LOG.info("There are {} eligible seats.", seatList.size());
-            for (DailyTrainSeat seat : seatList) {
+            for (int i = 0; i < seatList.size(); ++i) {
+                DailyTrainSeat seat = seatList.get(i);
+                String col = seat.getCol();
+                Integer seatIndex = seat.getCarriageSeatIndex();
+                if (StrUtil.isBlank(column)) {
+                    LOG.info("Did not choose seat");
+                } else {
+                    if (!col.equals(column)) {
+                        LOG.info("Seat {} does not match column, target: {}", seat, seatIndex);
+                        continue;
+                    }
+                }
+
                 boolean isChoose = canSell(seat, startIndex, endIndex);
                 if (isChoose) {
                     LOG.info("Choose seat.");
                 } else {
                     continue;
                 }
+
+                boolean isGetAllOffsetSeat = true;
+                if (CollUtil.isNotEmpty(offsetList)) {
+                    LOG.info("There is offset: {}, verifying if offset seat is choosable", offsetList);
+                    for (int j = 1; j < offsetList.size(); j++) {
+                        Integer offset = offsetList.get(j);
+                        // 座位在库的索引从1开始
+//                        int nextIndex = seatIndex + offset - 1;
+                        int nextIndex = i + offset;
+                        if (nextIndex >= seatList.size()) {
+                            LOG.info("There is no next index of {}", nextIndex);
+                            isGetAllOffsetSeat = false;
+                            break;
+                        }
+
+                        DailyTrainSeat nextDailyTrainSeat = seatList.get(nextIndex);
+                        boolean isChooseNext = canSell(nextDailyTrainSeat, startIndex, endIndex);
+                        if (isChooseNext) {
+                            LOG.info("Choose seat {}.", nextDailyTrainSeat.getCarriageSeatIndex());
+                        } else {
+                            LOG.info("Cannot choose seat {}.", nextDailyTrainSeat.getCarriageSeatIndex());
+                            isGetAllOffsetSeat = false;
+                            break;
+                        }
+                    }
+                }
+                if (!isGetAllOffsetSeat) {
+                    continue;
+                }
+                return;
             }
         }
     }
