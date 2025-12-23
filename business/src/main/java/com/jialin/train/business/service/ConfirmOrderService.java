@@ -119,6 +119,8 @@ public class ConfirmOrderService {
 
         reduceTickets(req, dailyTrainTicket);
 
+        List<DailyTrainSeat> finalSeatList = new ArrayList<>();
+
         //判断有无选座：seat属性是否为空
         ConfirmOrderTicketReq ticketReq0 = tickets.get(0);
         LOG.info("ticketReq0: {}", ticketReq0);
@@ -149,7 +151,8 @@ public class ConfirmOrderService {
             }
             LOG.info("OffsetList: {}", offsetList);
 
-            getSeat(date,
+            getSeat(finalSeatList,
+                    date,
                     trainCode,
                     ticketReq0.getSeatTypeCode(),
                     ticketReq0.getSeat().split("")[0],
@@ -159,7 +162,8 @@ public class ConfirmOrderService {
         } else {
             LOG.info("This order has no seat.");
             for (ConfirmOrderTicketReq ticketReq : tickets) {
-                getSeat(date,
+                getSeat(finalSeatList,
+                        date,
                         trainCode,
                         ticketReq0.getSeatTypeCode(),
                         null,
@@ -168,17 +172,21 @@ public class ConfirmOrderService {
                         dailyTrainTicket.getEndIndex());
             }
         }
+        LOG.info("Final chosen seats: {}", finalSeatList);
     }
+
     /*
     column: 第一个座位对应的列
      */
-    private void getSeat(Date date, String trainCode, String seatType, String column, List<Integer> offsetList, Integer startIndex, Integer endIndex) {
+    private void getSeat(List<DailyTrainSeat> finalSeatList, Date date, String trainCode, String seatType, String column, List<Integer> offsetList, Integer startIndex, Integer endIndex) {
+        List<DailyTrainSeat> getSeatList = new ArrayList<>();
         List<DailyTrainCarriage> carriageList = dailyTrainCarriageService
                 .selectBySeatType(date, trainCode, seatType);
         LOG.info("There are {} eligible carriages.", carriageList.size());
 
         for (DailyTrainCarriage dailyTrainCarriage : carriageList) {
-            LOG.info("Start choose seat from carriage {}", dailyTrainCarriage);
+            LOG.info("Start choose seat from carriage {}", dailyTrainCarriage.getIndex());
+            getSeatList = new ArrayList<>();
             List<DailyTrainSeat> seatList = dailyTrainSeatService
                     .selectByCarriage(date, trainCode, dailyTrainCarriage.getIndex());
             LOG.info("There are {} eligible seats.", seatList.size());
@@ -186,6 +194,19 @@ public class ConfirmOrderService {
                 DailyTrainSeat seat = seatList.get(i);
                 String col = seat.getCol();
                 Integer seatIndex = seat.getCarriageSeatIndex();
+
+                boolean alreadyChooseFlag = false;
+                for (DailyTrainSeat finalSeat : finalSeatList) {
+                    if (finalSeat.getId().equals(seat.getId())) {
+                        alreadyChooseFlag = true;
+                        break;
+                    }
+                }
+                if (alreadyChooseFlag) {
+                    LOG.info("This seat {} has already been chosen.", seatIndex);
+                    continue;
+                }
+
                 if (StrUtil.isBlank(column)) {
                     LOG.info("Did not choose seat");
                 } else {
@@ -197,6 +218,7 @@ public class ConfirmOrderService {
 
                 boolean isChoose = canSell(seat, startIndex, endIndex);
                 if (isChoose) {
+                    getSeatList.add(seat);
                     LOG.info("Choose seat.");
                 } else {
                     continue;
@@ -220,6 +242,7 @@ public class ConfirmOrderService {
                         boolean isChooseNext = canSell(nextDailyTrainSeat, startIndex, endIndex);
                         if (isChooseNext) {
                             LOG.info("Choose seat {}.", nextDailyTrainSeat.getCarriageSeatIndex());
+                            getSeatList.add(nextDailyTrainSeat);
                         } else {
                             LOG.info("Cannot choose seat {}.", nextDailyTrainSeat.getCarriageSeatIndex());
                             isGetAllOffsetSeat = false;
@@ -228,8 +251,11 @@ public class ConfirmOrderService {
                     }
                 }
                 if (!isGetAllOffsetSeat) {
+                    getSeatList = new ArrayList<>();
                     continue;
                 }
+
+                finalSeatList.addAll(getSeatList);
                 return;
             }
         }
