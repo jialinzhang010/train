@@ -116,7 +116,7 @@ export default defineComponent({
   name: "order-view",
   setup() {
     const passengers = ref([]);
-    const dailyTrainTicket = SessionStorage.get("dailyTrainTicket") || {};
+    const dailyTrainTicket = SessionStorage.get(SESSION_ORDER) || {};
     console.log("order info", dailyTrainTicket);
     const SEAT_TYPE = window.SEAT_TYPE;
     console.log(SEAT_TYPE);

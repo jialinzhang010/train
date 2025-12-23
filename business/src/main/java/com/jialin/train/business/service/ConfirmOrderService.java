@@ -3,6 +3,7 @@ package com.jialin.train.business.service;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.util.EnumUtil;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
 import com.alibaba.fastjson.JSON;
@@ -151,7 +152,9 @@ public class ConfirmOrderService {
                     trainCode,
                     ticketReq0.getSeatTypeCode(),
                     ticketReq0.getSeat().split("")[0],
-                    offsetList);
+                    offsetList,
+                    dailyTrainTicket.getStartIndex(),
+                    dailyTrainTicket.getEndIndex());
         } else {
             LOG.info("This order has no seat.");
             for (ConfirmOrderTicketReq ticketReq : tickets) {
@@ -159,22 +162,55 @@ public class ConfirmOrderService {
                         trainCode,
                         ticketReq0.getSeatTypeCode(),
                         null,
-                        null);
+                        null,
+                        dailyTrainTicket.getStartIndex(),
+                        dailyTrainTicket.getEndIndex());
             }
         }
     }
     /*
     column: 第一个座位对应的列
      */
-    private void getSeat(Date date, String trainCode, String seatType, String column, List<Integer> offsetList) {
-        List<DailyTrainCarriage> carriageList = dailyTrainCarriageService.selectBySeatType(date, trainCode, seatType);
+    private void getSeat(Date date, String trainCode, String seatType, String column, List<Integer> offsetList, Integer startIndex, Integer endIndex) {
+        List<DailyTrainCarriage> carriageList = dailyTrainCarriageService
+                .selectBySeatType(date, trainCode, seatType);
         LOG.info("There are {} eligible carriages.", carriageList.size());
 
         for (DailyTrainCarriage dailyTrainCarriage : carriageList) {
             LOG.info("Start choose seat from carriage {}", dailyTrainCarriage);
-            List<DailyTrainSeat> seatList = dailyTrainSeatService.selectByCarriage(date, trainCode, dailyTrainCarriage.getIndex());
+            List<DailyTrainSeat> seatList = dailyTrainSeatService
+                    .selectByCarriage(date, trainCode, dailyTrainCarriage.getIndex());
             LOG.info("There are {} eligible seats.", seatList.size());
+            for (DailyTrainSeat seat : seatList) {
+                boolean isChoose = canSell(seat, startIndex, endIndex);
+                if (isChoose) {
+                    LOG.info("Choose seat.");
+                } else {
+                    continue;
+                }
+            }
+        }
+    }
 
+    private boolean canSell(DailyTrainSeat seat, Integer startIndex, Integer endIndex) {
+        String sell = seat.getSell();
+        sell.substring(startIndex, endIndex);
+        String sellPart = sell.substring(startIndex, endIndex);
+        if (Integer.parseInt(sellPart) > 0) {
+            LOG.info("Seat has sell.");
+            return false;
+        } else {
+            LOG.info("Seat has not sell.");
+            String curSell = sellPart.replace('0', '1');
+            curSell = StrUtil.fillBefore(curSell, '0', endIndex);
+            curSell = StrUtil.fillAfter(curSell, '0', sell.length());
+            int newSellInt = NumberUtil.binaryToInt(curSell) | cn.hutool.core.util.NumberUtil.binaryToInt(sell);
+            String newSell = NumberUtil.getBinaryStr(newSellInt);
+            newSell = StrUtil.fillBefore(newSell, '0', sell.length());
+            LOG.info("座位{}被选中，原售票信息：{}，车站区间：{}~{}，即：{}，最终售票信息：{}"
+                    , seat.getCarriageSeatIndex(), sell, startIndex, endIndex, curSell, newSell);
+            seat.setSell(newSell);
+            return true;
         }
     }
 
