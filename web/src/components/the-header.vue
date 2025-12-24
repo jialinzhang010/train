@@ -32,6 +32,12 @@
           <border-outer-outlined /> &nbsp; Remaining tickets
         </router-link>
       </a-menu-item>
+      <a-menu-item key="/my-ticket">
+        <router-link to="/my-ticket">
+          <border-outer-outlined /> &nbsp; My tickets
+        </router-link>
+      </a-menu-item>
+
     </a-menu>
 
   </a-layout-header>
