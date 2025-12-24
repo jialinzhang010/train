@@ -1,8 +1,11 @@
 package com.jialin.train.business.service;
 
+import com.jialin.train.business.domain.ConfirmOrder;
 import com.jialin.train.business.domain.DailyTrainSeat;
 import com.jialin.train.business.domain.DailyTrainTicket;
+import com.jialin.train.business.enums.ConfirmOrderStatusEnum;
 import com.jialin.train.business.feign.MemberFeign;
+import com.jialin.train.business.mapper.ConfirmOrderMapper;
 import com.jialin.train.business.mapper.DailyTrainSeatMapper;
 import com.jialin.train.business.mapper.cust.DailyTrainTicketMapperCust;
 import com.jialin.train.business.req.ConfirmOrderTicketReq;
@@ -32,8 +35,11 @@ public class AfterConfirmOrderService {
     @Resource
     private MemberFeign memberFeign;
 
+    @Resource
+    private ConfirmOrderMapper confirmOrderMapper;
+
      @Transactional
-    public void afterDoConfirm(DailyTrainTicket dailyTrainTicket, List<DailyTrainSeat> finalSeatList, List<ConfirmOrderTicketReq> tickets) {
+    public void afterDoConfirm(DailyTrainTicket dailyTrainTicket, List<DailyTrainSeat> finalSeatList, List<ConfirmOrderTicketReq> tickets, ConfirmOrder confirmOrder) {
         // LOG.info("seata全局事务ID: {}", RootContext.getXID());
         for (int j = 0; j < finalSeatList.size(); j++) {
             DailyTrainSeat dailyTrainSeat = finalSeatList.get(j);
@@ -108,13 +114,12 @@ public class AfterConfirmOrderService {
             memberTicketReq.setSeatType(dailyTrainSeat.getSeatType());
             CommonResp<Object> commonResp = memberFeign.save(memberTicketReq);
             LOG.info("调用member接口，返回：{}", commonResp);
-//
-//            // 更新订单状态为成功
-//            ConfirmOrder confirmOrderForUpdate = new ConfirmOrder();
-//            confirmOrderForUpdate.setId(confirmOrder.getId());
-//            confirmOrderForUpdate.setUpdateTime(new Date());
-//            confirmOrderForUpdate.setStatus(ConfirmOrderStatusEnum.SUCCESS.getCode());
-//            confirmOrderMapper.updateByPrimaryKeySelective(confirmOrderForUpdate);
+
+            ConfirmOrder confirmOrderForUpdate = new ConfirmOrder();
+            confirmOrderForUpdate.setId(confirmOrder.getId());
+            confirmOrderForUpdate.setUpdateTime(new Date());
+            confirmOrderForUpdate.setStatus(ConfirmOrderStatusEnum.SUCCESS.getCode());
+            confirmOrderMapper.updateByPrimaryKeySelective(confirmOrderForUpdate);
 
             // 模拟调用方出现异常
             // Thread.sleep(10000);

@@ -177,7 +177,7 @@ public class ConfirmOrderService {
         }
         LOG.info("Final chosen seats: {}", finalSeatList);
 
-        afterConfirmOrderService.afterDoConfirm(dailyTrainTicket, finalSeatList, tickets);
+        afterConfirmOrderService.afterDoConfirm(dailyTrainTicket, finalSeatList, tickets, confirmOrder);
 
     }
 
