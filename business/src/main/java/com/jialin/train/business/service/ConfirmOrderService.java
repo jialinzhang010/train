@@ -50,6 +50,9 @@ public class ConfirmOrderService {
     @Resource
     private DailyTrainSeatService dailyTrainSeatService;
 
+    @Resource
+    private AfterConfirmOrderService afterConfirmOrderService;
+
     public void save(ConfirmOrderDoReq req) {
         DateTime now = DateTime.now();
         ConfirmOrder confirmOrder = BeanUtil.copyProperties(req, ConfirmOrder.class);
@@ -173,6 +176,9 @@ public class ConfirmOrderService {
             }
         }
         LOG.info("Final chosen seats: {}", finalSeatList);
+
+        afterConfirmOrderService.afterDoConfirm(dailyTrainTicket, finalSeatList);
+
     }
 
     /*
