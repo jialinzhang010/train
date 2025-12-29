@@ -21,6 +21,7 @@ public class LoginMemberFilter implements GlobalFilter, Ordered {
 
         if (path.contains("/admin")
                 || path.contains("/hello")
+                || path.contains("/redis")
                 || path.contains("/member/member/login")
                 || path.contains("/member/member/send-code")) {
             LOG.info("No need to verify login {}", path);
