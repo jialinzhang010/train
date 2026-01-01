@@ -12,7 +12,9 @@ public enum BusinessExceptionEnum {
     BUSINESS_TRAIN_STATION_NAME_UNIQUE_ERROR("Station name already exists"),
     BUSINESS_TRAIN_CARRIAGE_INDEX_UNIQUE_ERROR("Carriage number already exists"),
 
-    CONFIRM_ORDER_TICKET_COUNT_ERROR("Ticket is out of stock");
+    CONFIRM_ORDER_TICKET_COUNT_ERROR("Ticket is out of stock"),
+    CONFIRM_ORDER_EXCEPTION("Server is busy. Please try again later."),
+    CONFIRM_ORDER_LOCK_FAIL("Server is busy. Please try again later.");
 
     private String desc;
 
