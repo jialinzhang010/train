@@ -14,7 +14,9 @@ public enum BusinessExceptionEnum {
 
     CONFIRM_ORDER_TICKET_COUNT_ERROR("Ticket is out of stock"),
     CONFIRM_ORDER_EXCEPTION("Server is busy. Please try again later."),
-    CONFIRM_ORDER_LOCK_FAIL("Server is busy. Please try again later.");
+    CONFIRM_ORDER_LOCK_FAIL("Server is busy. Please try again later."),
+    CONFIRM_ORDER_FLOW_EXCEPTION("Too many people are buying tickets. Please try again later."),
+    CONFIRM_ORDER_SK_TOKEN_FAIL("Too many people are buying tickets. Please try again later.");
 
     private String desc;
 

@@ -109,4 +109,12 @@ public class DailyTrainStationService {
         }
 
     }
+
+    public long countByTrainCode(Date date, String trainCode) {
+        DailyTrainStationExample dailyTrainStationExample = new DailyTrainStationExample();
+        dailyTrainStationExample.createCriteria()
+                .andDateEqualTo(date)
+                .andTrainCodeEqualTo(trainCode);
+        return dailyTrainStationMapper.countByExample(dailyTrainStationExample);
+    }
 }

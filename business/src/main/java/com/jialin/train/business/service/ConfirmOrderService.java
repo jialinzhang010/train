@@ -3,15 +3,19 @@ package com.jialin.train.business.service;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateTime;
+import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.EnumUtil;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.hutool.core.util.StrUtil;
+import com.alibaba.csp.sentinel.annotation.SentinelResource;
+import com.alibaba.csp.sentinel.slots.block.BlockException;
 import com.alibaba.fastjson.JSON;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import com.jialin.train.business.domain.*;
 import com.jialin.train.business.enums.ConfirmOrderStatusEnum;
+import com.jialin.train.business.enums.RedisKeyPreEnum;
 import com.jialin.train.business.enums.SeatColEnum;
 import com.jialin.train.business.enums.SeatTypeEnum;
 import com.jialin.train.business.mapper.ConfirmOrderMapper;
@@ -25,8 +29,11 @@ import com.jialin.train.common.exception.BusinessExceptionEnum;
 import com.jialin.train.common.resp.PageResp;
 import com.jialin.train.common.util.SnowUtil;
 import jakarta.annotation.Resource;
+import org.redisson.api.RLock;
+import org.redisson.api.RedissonClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -55,8 +62,15 @@ public class ConfirmOrderService {
     @Resource
     private AfterConfirmOrderService afterConfirmOrderService;
 
-    @Resource
+    @Autowired
     private StringRedisTemplate redisTemplate;
+
+    @Autowired
+    private RedissonClient redissonClient;
+
+    @Resource
+    private SkTokenService skTokenService;
+
 
     public void save(ConfirmOrderDoReq req) {
         DateTime now = DateTime.now();
@@ -98,110 +112,148 @@ public class ConfirmOrderService {
         confirmOrderMapper.deleteByPrimaryKey(id);
     }
 
+    @SentinelResource(value="doConfirm", blockHandler = "doConfirmBlock")
     public void doConfirm(ConfirmOrderDoReq req) {
-        // 锁同一天同一车次
-        String key = req.getDate() + "-" + req.getTrainCode();
-        Boolean setIfAbsent = redisTemplate.opsForValue().setIfAbsent(key, key, 3600, TimeUnit.SECONDS);
-        if (setIfAbsent) {
-            LOG.info("Lock obtained!");
+        boolean validSkToken = skTokenService.validSkToken(req.getDate(), req.getTrainCode(), req.getMemberId());
+        if (validSkToken) {
+            LOG.info("Do confirm by sk token");
         } else {
-            LOG.info("Lose lock!");
-            throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_LOCK_FAIL);
+            LOG.info("Do confirm by sk token fail");
+            throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_TICKET_COUNT_ERROR);
         }
-        DateTime now = DateTime.now();
-        ConfirmOrder confirmOrder = new ConfirmOrder();
-        confirmOrder.setId(SnowUtil.getSnowflakeNextId());
-        confirmOrder.setUpdateTime(now);
-        confirmOrder.setCreateTime(now);
-        confirmOrder.setMemberId(LoginMemberContext.getId());
 
-        Date date = req.getDate();
-        String trainCode = req.getTrainCode();
-        String start = req.getStart();
-        String end = req.getEnd();
-        List<ConfirmOrderTicketReq> tickets = req.getTickets();
-
-        confirmOrder.setDate(date);
-        confirmOrder.setTrainCode(trainCode);
-        confirmOrder.setStart(start);
-        confirmOrder.setEnd(end);
-        confirmOrder.setDailyTrainTicketId(req.getDailyTrainTicketId());
-        confirmOrder.setStatus(ConfirmOrderStatusEnum.INIT.getCode());
-        confirmOrder.setTickets(JSON.toJSONString(tickets));
-        confirmOrderMapper.insert(confirmOrder);
-        LOG.info("日期: {}", date);
-
-        // 查处余票记录，因为需要得到真实的库存。
-        // 会导致超卖。
-        DailyTrainTicket dailyTrainTicket = dailyTrainTicketService.selectByUnique(date, trainCode, start, end);
-        LOG.info("dailyTrainTicket: {}", dailyTrainTicket);
-
-        // 预扣余票数量，并判断余票是否足够。
-        reduceTickets(req, dailyTrainTicket);
-
-        List<DailyTrainSeat> finalSeatList = new ArrayList<>();
-
-        //判断有无选座：seat属性是否为空
-        ConfirmOrderTicketReq ticketReq0 = tickets.get(0);
-        LOG.info("ticketReq0: {}", ticketReq0);
-        // isBlank对空格也生效
-        if (StrUtil.isNotBlank(ticketReq0.getSeat())) {
-            LOG.info("This order has seat.");
-            List<SeatColEnum> colEnumList = SeatColEnum.getColsByType(ticketReq0.getSeatTypeCode());
-            LOG.info("The cols in this order: {}", colEnumList);
-            // e.g. {A1, C1, D1, F1, A2, C2, D2, F2}
-            List<String> referSeatList = new ArrayList<>();
-            for (int i = 1; i <= 2; i++) {
-                for (SeatColEnum seatColEnum : colEnumList) {
-                    referSeatList.add(seatColEnum.getCode() + i);
+        // 锁同一天同一车次
+        String lockKey = RedisKeyPreEnum.CONFIRM_ORDER + "-" + DateUtil.formatDate(req.getDate()) + "-" + req.getTrainCode();
+//        Boolean setIfAbsent = redisTemplate.opsForValue().setIfAbsent(lockKey, lockKey, 5, TimeUnit.SECONDS);
+//        if (Boolean.TRUE.equals(setIfAbsent)) {
+//            LOG.info("Lock obtained!");
+//        } else {
+//            LOG.info("Lose lock!");
+//            throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_LOCK_FAIL);
+//        }
+        RLock lock = null;
+        try {
+            // 使用redisson，自带看门狗
+            lock = redissonClient.getLock(lockKey);
+            // waitTime：等待时长设置为0，如果没拿到锁就不等待，直接返回false。
+            // leaseTime 不写的话会有看门狗机制，默认释放时间30秒。
+            // 只要业务逻辑还没执行完，看门狗就会每隔 10 秒（即 lockWatchdogTimeout / 3）检查一次。如果业务还在运行，它就会自动将锁的过期时间重置回 30 秒。
+            boolean tryLock = lock.tryLock(0, TimeUnit.SECONDS);
+            if (tryLock) {
+                LOG.info("Confirm order lock acquired");
+                for (int i = 0; i < 30; ++i) {
+                    Long expire = redisTemplate.opsForValue().getOperations().getExpire(lockKey);
+                    LOG.info("{} seconds till expire!", expire);
+                    Thread.sleep(1000);
                 }
+            } else {
+                LOG.info("Confirm order lock acquisition fail");
+                throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_LOCK_FAIL);
             }
-            LOG.info("ReferSeatList: {}", referSeatList);
 
-            List<Integer> absoluteOffsetList = new ArrayList<>();
-            List<Integer> offsetList = new ArrayList<>();
-            for (ConfirmOrderTicketReq ticketReq : tickets) {
-                int index = referSeatList.indexOf(ticketReq.getSeat());
-                absoluteOffsetList.add(index);
-            }
-            LOG.info("AbsoluteOffsetList: {}", absoluteOffsetList);
-            for (Integer index : absoluteOffsetList) {
-                int offset = index - absoluteOffsetList.get(0);
-                offsetList.add(offset);
-            }
-            LOG.info("OffsetList: {}", offsetList);
+            DateTime now = DateTime.now();
+            ConfirmOrder confirmOrder = new ConfirmOrder();
+            confirmOrder.setId(SnowUtil.getSnowflakeNextId());
+            confirmOrder.setUpdateTime(now);
+            confirmOrder.setCreateTime(now);
+            confirmOrder.setMemberId(LoginMemberContext.getId());
 
-            getSeat(finalSeatList,
-                    date,
-                    trainCode,
-                    ticketReq0.getSeatTypeCode(),
-                    ticketReq0.getSeat().split("")[0],
-                    offsetList,
-                    dailyTrainTicket.getStartIndex(),
-                    dailyTrainTicket.getEndIndex());
-        } else {
-            LOG.info("This order has no seat.");
-            for (ConfirmOrderTicketReq ticketReq : tickets) {
+            Date date = req.getDate();
+            String trainCode = req.getTrainCode();
+            String start = req.getStart();
+            String end = req.getEnd();
+            List<ConfirmOrderTicketReq> tickets = req.getTickets();
+
+            confirmOrder.setDate(date);
+            confirmOrder.setTrainCode(trainCode);
+            confirmOrder.setStart(start);
+            confirmOrder.setEnd(end);
+            confirmOrder.setDailyTrainTicketId(req.getDailyTrainTicketId());
+            confirmOrder.setStatus(ConfirmOrderStatusEnum.INIT.getCode());
+            confirmOrder.setTickets(JSON.toJSONString(tickets));
+            confirmOrderMapper.insert(confirmOrder);
+            LOG.info("日期: {}", date);
+
+            // 查处余票记录，因为需要得到真实的库存。
+            // 会导致超卖。
+            DailyTrainTicket dailyTrainTicket = dailyTrainTicketService.selectByUnique(date, trainCode, start, end);
+            LOG.info("dailyTrainTicket: {}", dailyTrainTicket);
+
+            // 预扣余票数量，并判断余票是否足够。
+            reduceTickets(req, dailyTrainTicket);
+
+            List<DailyTrainSeat> finalSeatList = new ArrayList<>();
+
+            //判断有无选座：seat属性是否为空
+            ConfirmOrderTicketReq ticketReq0 = tickets.get(0);
+            LOG.info("ticketReq0: {}", ticketReq0);
+            // isBlank对空格也生效
+            if (StrUtil.isNotBlank(ticketReq0.getSeat())) {
+                LOG.info("This order has seat.");
+                List<SeatColEnum> colEnumList = SeatColEnum.getColsByType(ticketReq0.getSeatTypeCode());
+                LOG.info("The cols in this order: {}", colEnumList);
+                // e.g. {A1, C1, D1, F1, A2, C2, D2, F2}
+                List<String> referSeatList = new ArrayList<>();
+                for (int i = 1; i <= 2; i++) {
+                    for (SeatColEnum seatColEnum : colEnumList) {
+                        referSeatList.add(seatColEnum.getCode() + i);
+                    }
+                }
+                LOG.info("ReferSeatList: {}", referSeatList);
+
+                List<Integer> absoluteOffsetList = new ArrayList<>();
+                List<Integer> offsetList = new ArrayList<>();
+                for (ConfirmOrderTicketReq ticketReq : tickets) {
+                    int index = referSeatList.indexOf(ticketReq.getSeat());
+                    absoluteOffsetList.add(index);
+                }
+                LOG.info("AbsoluteOffsetList: {}", absoluteOffsetList);
+                for (Integer index : absoluteOffsetList) {
+                    int offset = index - absoluteOffsetList.get(0);
+                    offsetList.add(offset);
+                }
+                LOG.info("OffsetList: {}", offsetList);
+
                 getSeat(finalSeatList,
                         date,
                         trainCode,
                         ticketReq0.getSeatTypeCode(),
-                        null,
-                        null,
+                        ticketReq0.getSeat().split("")[0],
+                        offsetList,
                         dailyTrainTicket.getStartIndex(),
                         dailyTrainTicket.getEndIndex());
+            } else {
+                LOG.info("This order has no seat.");
+                for (ConfirmOrderTicketReq ticketReq : tickets) {
+                    getSeat(finalSeatList,
+                            date,
+                            trainCode,
+                            ticketReq0.getSeatTypeCode(),
+                            null,
+                            null,
+                            dailyTrainTicket.getStartIndex(),
+                            dailyTrainTicket.getEndIndex());
+                }
             }
-        }
-        LOG.info("Final chosen seats: {}", finalSeatList);
+            LOG.info("Final chosen seats: {}", finalSeatList);
 
-        try {
-            afterConfirmOrderService.afterDoConfirm(dailyTrainTicket, finalSeatList, tickets, confirmOrder);
+            try {
+                afterConfirmOrderService.afterDoConfirm(dailyTrainTicket, finalSeatList, tickets, confirmOrder);
+            } catch (Exception e) {
+                LOG.error("Save order failed", e);
+                throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_EXCEPTION);
+            }
+            LOG.info("Ticket purchasing process complete, releasing key!");
+            redisTemplate.delete(lockKey);
         } catch (Exception e) {
             LOG.error("Save order failed", e);
-            throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_EXCEPTION);
+        } finally {
+            LOG.info("Order finished, releasing key!");
+            // 只有当前线程能释放锁
+            if (lock != null && lock.isHeldByCurrentThread()) {
+                lock.unlock();
+            }
         }
-
-
     }
 
     /*
@@ -347,5 +399,9 @@ public class ConfirmOrderService {
                 }
             }
         }
+    }
+    public void doConfirmBlock(ConfirmOrderDoReq req, BlockException e) {
+        LOG.info("Do confirm block: {}.", req);
+        throw new BusinessException(BusinessExceptionEnum.CONFIRM_ORDER_FLOW_EXCEPTION);
     }
 }

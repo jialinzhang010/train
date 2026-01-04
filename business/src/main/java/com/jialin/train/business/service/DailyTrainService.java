@@ -47,6 +47,9 @@ public class DailyTrainService {
     @Resource
     private DailyTrainTicketService dailyTrainTicketService;
 
+    @Resource
+    private SkTokenService skTokenService;
+
     public void save(DailyTrainSaveReq req) {
         DateTime now = DateTime.now();
         DailyTrain dailyTrain = BeanUtil.copyProperties(req, DailyTrain.class);
@@ -129,5 +132,6 @@ public class DailyTrainService {
         dailyTrainCarriageService.genDaily(date, train.getCode());
         dailyTrainSeatService.genDaily(date, train.getCode());
         dailyTrainTicketService.genDaily(dailyTrain, date, train.getCode());
+        skTokenService.genDaily(date, train.getCode());
     }
 }
